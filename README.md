@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Voom website
 
-## Getting Started
+The public website of Voom (car rental in Morocco): pages built for Google, in French, Arabic (right to left) and English.
+It reads the same Supabase project as the Voom app and only shows what the database lets the public see
+(available cars of approved agencies; the agency's name is never shown).
 
-First, run the development server:
+## Pages
+
+| Address | What it is |
+| --- | --- |
+| `/fr`, `/ar`, `/en` | Home: search by city, cities, latest cars, how it works, FAQ |
+| `/{lang}/cities/{city}` | A city page with its cars (12 main cities, see `lib/cities.ts`) |
+| `/{lang}/cars/{id}` | One car, with price, specs and structured data for Google |
+| `/{lang}/agencies` | Page for agencies that want to join |
+| `/sitemap.xml`, `/robots.txt` | For search engines; every page lists its translations |
+
+An address without a language (`/`) is redirected to the visitor's language (`proxy.ts`).
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # then fill in the Supabase values
+npm run dev                  # http://localhost:3000
+npm run build && npm start   # production check
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Where things are
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `dictionaries/` all the text, one file per language (`fr.ts` is the reference, the others must match its shape)
+- `lib/cities.ts` the cities, with their names in each language
+- `lib/cars.ts` reads cars from Supabase, cached for about an hour
+- `lib/site.ts` support email and phone, store links (leave empty until the app is published)
+- `components/` header, footer, car card, FAQ, etc.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Publishing (Vercel)
 
-## Learn More
+1. Push this folder to a GitHub repository.
+2. On vercel.com: New Project, import the repository.
+3. Add the variables from `.env.example` under Settings, Environment Variables (the two Turnstile ones come from the next section).
+4. Deploy. Then Settings, Domains: add `voomrental.com` and follow the DNS instructions at your domain provider.
+5. On search.google.com/search-console add the site, then submit `https://voomrental.com/sitemap.xml`.
 
-To learn more about Next.js, take a look at the following resources:
+## Bot check (Cloudflare Turnstile)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Agency sign-up and password reset ask for a Turnstile check before an email is sent.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. dash.cloudflare.com, Turnstile, Add widget. Hostnames: `voomrental.com` (add `localhost` to test). Mode: Managed.
+2. Put the site key in `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and the secret key in `TURNSTILE_SECRET_KEY`.
+3. Redeploy. With both empty, the check is off and the forms work without it.
 
-## Deploy on Vercel
+This protects the website forms only. Someone calling Supabase directly with the public key is not stopped by it (the app has the same exposure). Supabase's own CAPTCHA setting would block that too, but it would also require the app to send a token, so it stays off for now.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+After new cars or cities appear in the database the pages refresh by themselves within about an hour.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Not built yet
+
+- Customers booking from the website: bookings are still made in the app.
+- Store links: fill `APP_STORE_URL` and `PLAY_STORE_URL` in `lib/site.ts` when the app is published.
