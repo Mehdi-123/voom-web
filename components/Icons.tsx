@@ -34,3 +34,32 @@ export const LogoutIcon = ({ className = "" }: { className?: string }) => (
 export const PlusIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M12 5v14M5 12h14" /></svg>
 );
+
+export const BellIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" /></svg>
+);
+export const SunIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+);
+export const MoonIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" /></svg>
+);
+export const ChevronsLeftIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" /></svg>
+);
+export const CoinsIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><circle cx="9" cy="9" r="6" /><path d="M15 6.3A6 6 0 0121 12a6 6 0 01-8 5.6M9 6.5v5M7 8.5h3" /></svg>
+);
+export const StarIcon = ({ className = "", filled = false }: { className?: string; filled?: boolean }) => (
+  <svg {...base} fill={filled ? "currentColor" : "none"} className={className} aria-hidden><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+);
+
+export const PinIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M12 21s7-5.7 7-11a7 7 0 10-14 0c0 5.3 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
+);
+export const CheckIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2.4} className={className} aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
+);
+export const ChevronDownIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M6 9l6 6 6-6" /></svg>
+);

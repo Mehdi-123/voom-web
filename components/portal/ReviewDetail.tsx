@@ -72,7 +72,7 @@ export default function ReviewDetail({ kind }: { kind: Kind }) {
     })();
   }, [id, kind, role, t]);
 
-  if (role !== "admin") return <p className="text-white/70">{t.notAdmin}</p>;
+  if (role !== "admin") return <p className="text-fg/70">{t.notAdmin}</p>;
   if (!detail) return <Loading />;
 
   async function decide(status: "approved" | "rejected") {
@@ -88,22 +88,22 @@ export default function ReviewDetail({ kind }: { kind: Kind }) {
 
   return (
     <>
-      <Link href={`/${lang}/dashboard/review?kind=${kind === "agency" ? "agencies" : "customers"}`} className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/70 hover:text-white"><span className="rtl:rotate-180">←</span> {t.title}</Link>
+      <Link href={`/${lang}/dashboard/review?kind=${kind === "agency" ? "agencies" : "customers"}`} className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-fg/70 hover:text-fg"><span className="rtl:rotate-180">←</span> {t.title}</Link>
       <PageHeader title={detail.title} subtitle={`${t.submitted} ${shortDate(detail.submitted, lang)}`} action={<StatusBadge status={detail.status} label={dict.dash.status[detail.status]} />} />
 
-      {detail.reason ? <div className="mb-6"><Card><p className="text-xs font-bold uppercase tracking-wider text-white/50">{t.reasonLabel}</p><p className="mt-1">{detail.reason}</p></Card></div> : null}
+      {detail.reason ? <div className="mb-6"><Card><p className="text-xs font-bold uppercase tracking-wider text-fg/50">{t.reasonLabel}</p><p className="mt-1">{detail.reason}</p></Card></div> : null}
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div>
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-white/60">{t.documents}</h2>
-          {detail.docs.length === 0 ? <Card><p className="text-sm text-white/55">{t.photoUnavailable}</p></Card> : null}
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-fg/60">{t.documents}</h2>
+          {detail.docs.length === 0 ? <Card><p className="text-sm text-fg/55">{t.photoUnavailable}</p></Card> : null}
           <div className="grid gap-4 sm:grid-cols-2">
             {detail.docs.map((doc, i) => (
               <button key={doc.path} type="button" disabled={!urls[i]} onClick={() => urls[i] && setZoom(urls[i])} className="text-start">
-                <span className="relative block aspect-[1.6] overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-                  {urls[i] ? /* signed, short-lived storage URLs can't go through next/image */ <img src={urls[i]!} alt={doc.label} className="h-full w-full object-cover" /> : <span className="flex h-full items-center justify-center text-sm text-white/50">{t.photoUnavailable}</span>}
+                <span className="relative block aspect-[1.6] overflow-hidden rounded-2xl border border-fg/10 bg-fg/5">
+                  {urls[i] ? /* signed, short-lived storage URLs can't go through next/image */ <img src={urls[i]!} alt={doc.label} className="h-full w-full object-cover" /> : <span className="flex h-full items-center justify-center text-sm text-fg/50">{t.photoUnavailable}</span>}
                 </span>
-                <span className="mt-2 block text-sm font-semibold text-white/70">{doc.label}</span>
+                <span className="mt-2 block text-sm font-semibold text-fg/70">{doc.label}</span>
               </button>
             ))}
           </div>
@@ -111,10 +111,10 @@ export default function ReviewDetail({ kind }: { kind: Kind }) {
 
         <div className="space-y-4">
           <Card>
-            <dl className="divide-y divide-white/10">
+            <dl className="divide-y divide-fg/10">
               {detail.rows.map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 py-3.5">
-                  <dt className="text-sm text-white/55">{label}</dt>
+                  <dt className="text-sm text-fg/55">{label}</dt>
                   <dd className="select-all text-end font-semibold">{value || "—"}</dd>
                 </div>
               ))}
@@ -125,9 +125,9 @@ export default function ReviewDetail({ kind }: { kind: Kind }) {
 
           {rejecting ? (
             <Card className="space-y-4">
-              <p className="text-sm text-white/60">{t.rejectHint}</p>
+              <p className="text-sm text-fg/60">{t.rejectHint}</p>
               <Field label={t.reasonLabel}>
-                <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t.reasonPlaceholder} rows={3} className="w-full rounded-2xl border border-white/15 bg-white/5 p-4 text-white outline-none placeholder:text-white/35 focus:border-volt" />
+                <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t.reasonPlaceholder} rows={3} className="w-full rounded-2xl border border-fg/15 bg-fg/5 p-4 text-fg outline-none placeholder:text-fg/35 focus:border-volt" />
               </Field>
               <PrimaryButton type="button" loading={busy} disabled={!reason.trim()} onClick={() => decide("rejected")} className="!bg-[#ff5c3a]">{t.sendRejection}</PrimaryButton>
               <GhostButton type="button" onClick={() => setRejecting(false)} className="w-full">{dict.dash.common.cancel}</GhostButton>

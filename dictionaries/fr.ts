@@ -5,7 +5,7 @@ const fr = {
     siteTitle: "Voom, location de voiture au Maroc",
     siteDescription: "Louez une voiture auprès d'agences vérifiées dans les villes du Maroc. Choisissez, réservez en quelques minutes et payez sur place, en dirhams.",
   },
-  nav: { cities: "Villes", agencies: "Agences", download: "Télécharger l'app", language: "Langue", menu: "Menu" },
+  nav: { cities: "Villes", agencies: "Agences", download: "Télécharger l'app", language: "Langue", menu: "Menu", account: "Mon espace" },
   hero: {
     eyebrow: "Location de voiture au Maroc",
     title: "Louez la voiture qu'il vous faut, en quelques minutes.",

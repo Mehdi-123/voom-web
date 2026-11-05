@@ -11,10 +11,15 @@ export type Agency = {
   city: string;
   phone: string | null;
   email: string | null;
+  address: string | null;
+  logo_url: string | null;
   registration_number: string | null;
   approval_status: Approval;
   rejection_reason: string | null;
 };
+
+export type Identity = { status: "none" | Approval; reason: string | null };
+export type Renter = { name: string | null; phone: string | null; avatar_url: string | null; strike_count: number };
 
 type AuthState = {
   /** False until we know whether someone is signed in. */
@@ -23,6 +28,9 @@ type AuthState = {
   /** "admin" comes from the admins table; the sign-up choice decides agency or customer. */
   role: "admin" | "agency" | "customer" | null;
   agency: Agency | null;
+  /** For renters: their profile row and where their identity check stands. */
+  renter: Renter | null;
+  identity: Identity | null;
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -37,11 +45,11 @@ export function useAuth(): AuthState {
 
 /** Keeps track of who is signed in and, for agencies, their agency row and approval status. */
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<Omit<AuthState, "refresh" | "signOut">>({ ready: false, user: null, role: null, agency: null });
+  const [state, setState] = useState<Omit<AuthState, "refresh" | "signOut">>({ ready: false, user: null, role: null, agency: null, renter: null, identity: null });
 
   const load = useCallback(async (session: Session | null) => {
     if (!session) {
-      setState({ ready: true, user: null, role: null, agency: null });
+      setState({ ready: true, user: null, role: null, agency: null, renter: null, identity: null });
       return;
     }
     const user = session.user;
@@ -51,12 +59,29 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     if (role === "agency") {
       const { data } = await sb
         .from("agencies")
-        .select("id, name, city, phone, email, registration_number, approval_status, rejection_reason")
+        .select("id, name, city, phone, email, address, logo_url, registration_number, approval_status, rejection_reason")
         .eq("user_id", user.id)
         .maybeSingle();
       agency = (data as Agency | null) ?? null;
     }
-    setState({ ready: true, user, role, agency });
+    let renter: Renter | null = null;
+    let identity: Identity | null = null;
+    if (role === "customer") {
+      const [profile, docs] = await Promise.all([
+        sb.from("profiles").select("name, phone, avatar_url, strike_count").eq("id", user.id).maybeSingle(),
+        sb.from("customer_documents").select("status, rejection_reason").eq("user_id", user.id).maybeSingle(),
+      ]);
+      const row = profile.data as Partial<Renter> | null;
+      renter = {
+        name: row?.name ?? (user.user_metadata?.name as string | undefined) ?? null,
+        phone: row?.phone ?? (user.user_metadata?.phone as string | undefined) ?? null,
+        avatar_url: row?.avatar_url ?? null,
+        strike_count: row?.strike_count ?? 0,
+      };
+      const d = docs.data as { status: Approval; rejection_reason: string | null } | null;
+      identity = { status: d?.status ?? "none", reason: d?.rejection_reason ?? null };
+    }
+    setState({ ready: true, user, role, agency, renter, identity });
   }, []);
 
   useEffect(() => {

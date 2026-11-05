@@ -8,11 +8,12 @@ import { BOOKING_SELECT, BookingRow } from "@/lib/portal-types";
 import { useAuth } from "@/components/portal/AuthProvider";
 import { useDash } from "@/components/portal/DashContext";
 import AdminOverview from "@/components/portal/AdminOverview";
+import CustomerHome from "@/components/portal/CustomerHome";
 import { Empty, Loading, PageHeader, Stat, StatusBadge, shortDate } from "@/components/portal/dash-ui";
 
 export default function DashboardHome() {
   const { role } = useAuth();
-  return role === "admin" ? <AdminOverview /> : <AgencyOverview />;
+  return role === "admin" ? <AdminOverview /> : role === "customer" ? <CustomerHome /> : <AgencyOverview />;
 }
 
 function AgencyOverview() {
@@ -43,12 +44,12 @@ function AgencyOverview() {
 
       {agency.approval_status === "pending" ? (
         <div className="mb-8 flex items-start gap-4 rounded-3xl border border-volt/40 bg-volt/10 p-5">
-          <span aria-hidden className="mt-1 h-3 w-3 shrink-0 rounded-full bg-[#ffd166]" />
-          <p className="text-white/85">{t.overview.reviewBanner}</p>
+          <span aria-hidden className="mt-1 h-3 w-3 shrink-0 rounded-full bg-warn" />
+          <p className="text-fg/85">{t.overview.reviewBanner}</p>
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-4">
         <Stat label={t.overview.toHandle} value={pending.length} tone="accent" />
         <Stat label={t.overview.active} value={bookings.filter((b) => b.status === "active").length} />
         <Stat label={t.overview.month} value={formatPrice(month, lang)} tone="good" />
@@ -65,10 +66,10 @@ function AgencyOverview() {
         ) : (
           <div className="space-y-3">
             {pending.slice(0, 5).map((b) => (
-              <Link key={b.id} href={`/${lang}/dashboard/bookings/${b.id}`} className="glass flex flex-wrap items-center justify-between gap-3 rounded-3xl p-5 transition-colors hover:bg-white/10">
+              <Link key={b.id} href={`/${lang}/dashboard/bookings/${b.id}`} className="glass flex flex-wrap items-center justify-between gap-3 rounded-3xl p-5 transition-colors hover:bg-fg/10">
                 <div>
                   <p className="font-bold">{t.overview.customerCar.replace("{customer}", b.customer?.name ?? t.bookings.unknownCustomer).replace("{car}", b.car ? `${b.car.make} ${b.car.model}` : "")}</p>
-                  <p className="text-sm text-white/55">{shortDate(b.date_from, lang)} → {shortDate(b.date_to, lang)} · {formatPrice(b.total_price, lang)}</p>
+                  <p className="text-sm text-fg/55">{shortDate(b.date_from, lang)} → {shortDate(b.date_to, lang)} · {formatPrice(b.total_price, lang)}</p>
                 </div>
                 <StatusBadge status={b.status} label={t.status[b.status]} />
               </Link>

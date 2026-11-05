@@ -77,7 +77,7 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-3xl font-extrabold">{copy[0]}</h1>
-        <p className="mt-3 leading-relaxed text-white/60">{copy[1]}</p>
+        <p className="mt-3 leading-relaxed text-fg/60">{copy[1]}</p>
       </div>
 
       {step === 1 ? (
@@ -103,7 +103,7 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
           <Field label={t.password}>
             <TextInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
-              {rules.map((r) => <li key={r.label} className={`text-sm ${r.ok ? "text-go" : "text-white/45"}`}>{r.ok ? "✓" : "○"} {r.label}</li>)}
+              {rules.map((r) => <li key={r.label} className={`text-sm ${r.ok ? "text-go" : "text-fg/45"}`}>{r.ok ? "✓" : "○"} {r.label}</li>)}
             </ul>
           </Field>
           <Field label={t.confirmPassword} error={confirm && password !== confirm ? t.mismatch : undefined}><TextInput type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" /></Field>

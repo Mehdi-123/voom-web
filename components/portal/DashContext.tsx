@@ -3,14 +3,17 @@
 import { createContext, ReactNode, useContext } from "react";
 import type { Dictionary } from "@/dictionaries/fr";
 import type { Locale } from "@/lib/i18n";
+import type { useNotices } from "./notifications";
 
-const DashContext = createContext<{ lang: Locale; dict: Dictionary } | null>(null);
+type Value = { lang: Locale; dict: Dictionary; notices: ReturnType<typeof useNotices> };
 
-export function DashProvider({ lang, dict, children }: { lang: Locale; dict: Dictionary; children: ReactNode }) {
-  return <DashContext.Provider value={{ lang, dict }}>{children}</DashContext.Provider>;
+const DashContext = createContext<Value | null>(null);
+
+export function DashProvider({ children, ...value }: Value & { children: ReactNode }) {
+  return <DashContext.Provider value={value}>{children}</DashContext.Provider>;
 }
 
-/** The page's language and its text, for the dashboard pages. */
+/** The page's language and its text, and the inbox, for the dashboard pages. */
 export function useDash() {
   const ctx = useContext(DashContext);
   if (!ctx) throw new Error("useDash must be used inside the dashboard");

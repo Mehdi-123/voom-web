@@ -33,7 +33,7 @@ export default function StoryScroll({ steps, phones }: { steps: Step[]; phones: 
             key={s.title}
             ref={(el) => { refs.current[i] = el; }}
             data-index={i}
-            className="flex min-h-[40vh] flex-col justify-center gap-6 py-10 lg:min-h-[85vh]"
+            className="flex flex-col justify-center gap-6 py-10 lg:min-h-[85vh]"
           >
             <span className={`font-display text-8xl font-extrabold leading-none transition-colors duration-500 sm:text-9xl ${active === i ? "text-volt" : "outline-text"}`}>{i + 1}</span>
             <div className={`transition-opacity duration-500 ${active === i ? "lg:opacity-100" : "lg:opacity-30"}`}>

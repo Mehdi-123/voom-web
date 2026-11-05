@@ -145,7 +145,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
       <form onSubmit={verify} className="space-y-8">
         <div>
           <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-white/60">{t.codeSubtitle.replace("{email}", cleanEmail)}</p>
+          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", cleanEmail)}</p>
         </div>
         <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
         {formError ? <ErrorNote>{formError}</ErrorNote> : null}
@@ -165,14 +165,14 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
     <form onSubmit={step === 4 ? createAccount : (ev) => { ev.preventDefault(); if (validate()) setStep((s) => s + 1); }} className="space-y-7" noValidate>
       <div>
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{t.signupTitle}</h1>
-        <p className="mt-3 leading-relaxed text-white/60">{t.signupSubtitle}</p>
+        <p className="mt-3 leading-relaxed text-fg/60">{t.signupSubtitle}</p>
       </div>
 
       <ol className="flex gap-2 py-1" aria-label={t.steps[step - 1]}>
         {t.steps.map((label, i) => (
           <li key={label} className="flex-1">
-            <span className={`block h-1.5 rounded-full ${i < step ? "bg-volt" : "bg-white/15"}`} />
-            <span className={`mt-1.5 block text-xs font-semibold ${i + 1 === step ? "text-white" : "text-white/40"}`}>{label}</span>
+            <span className={`block h-1.5 rounded-full ${i < step ? "bg-volt" : "bg-fg/15"}`} />
+            <span className={`mt-1.5 block text-xs font-semibold ${i + 1 === step ? "text-fg" : "text-fg/40"}`}>{label}</span>
           </li>
         ))}
       </ol>
@@ -183,7 +183,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
           <Field label={t.ownerName} error={errors.ownerName}><TextInput value={ownerName} onChange={(e) => setOwnerName(e.target.value)} invalid={!!errors.ownerName} autoComplete="name" /></Field>
           <Field label={t.phone} error={errors.phone} hint={t.phoneHint}>
             <div dir="ltr" className="flex gap-2">
-              <span className="flex h-14 items-center rounded-2xl border border-white/15 bg-white/5 px-4 font-semibold text-white/70">+212</span>
+              <span className="flex h-14 items-center rounded-2xl border border-fg/15 bg-fg/5 px-4 font-semibold text-fg/70">+212</span>
               <TextInput type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))} invalid={!!errors.phone} autoComplete="tel-national" placeholder="6 12 34 56 78" />
             </div>
           </Field>
@@ -193,7 +193,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
       {step === 2 ? (
         <>
           <Field label={t.city} error={errors.city}>
-            <SelectInput value={city} onChange={(e) => setCity(e.target.value)} className={errors.city ? "!border-[#ff7a5c]" : ""}>
+            <SelectInput value={city} onChange={(e) => setCity(e.target.value)} className={errors.city ? "!border-danger" : ""}>
               <option value="" className="bg-night">{t.cityPlaceholder}</option>
               {MOROCCAN_CITIES.map((c) => <option key={c} value={c} className="bg-night">{c}</option>)}
             </SelectInput>
@@ -206,10 +206,10 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
         <>
           <Field label={t.registration} error={errors.registration}><TextInput value={registration} onChange={(e) => setRegistration(e.target.value.toUpperCase())} invalid={!!errors.registration} /></Field>
           <Field label={t.license} error={errors.file} hint={t.licenseHint}>
-            <span className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-5 text-center transition-colors hover:bg-white/5 ${errors.file ? "border-[#ff7a5c]" : file ? "border-volt/60" : "border-white/20"}`}>
+            <span className={`flex min-h-32 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-5 text-center transition-colors hover:bg-fg/5 ${errors.file ? "border-danger" : file ? "border-volt/60" : "border-fg/20"}`}>
               <input type="file" accept="image/jpeg,image/png" capture={undefined} className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               {file ? <span className="break-all text-sm font-semibold text-go">✓ {file.name}</span> : null}
-              <span className="rounded-full bg-white/10 px-5 py-2 text-sm font-semibold">{file ? t.changeFile : t.chooseFile}</span>
+              <span className="rounded-full bg-fg/10 px-5 py-2 text-sm font-semibold">{file ? t.changeFile : t.chooseFile}</span>
             </span>
           </Field>
         </>
@@ -222,8 +222,8 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
             <TextInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
               {rules.map((r) => (
-                <li key={r.label} className={`flex items-center gap-2 text-sm ${r.ok ? "text-go" : "text-white/45"}`}>
-                  <span aria-hidden className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${r.ok ? "bg-go text-ink" : "border border-white/30"}`}>{r.ok ? "✓" : ""}</span>
+                <li key={r.label} className={`flex items-center gap-2 text-sm ${r.ok ? "text-go" : "text-fg/45"}`}>
+                  <span aria-hidden className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${r.ok ? "bg-go text-ink" : "border border-fg/30"}`}>{r.ok ? "✓" : ""}</span>
                   {r.label}
                 </li>
               ))}
@@ -233,12 +233,12 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
           <div>
             <label className="flex cursor-pointer items-start gap-3">
               <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#a259ff]" />
-              <span className="text-sm text-white/80">
+              <span className="text-sm text-fg/80">
                 {t.accept}{" "}
                 <Link href={`/${lang}/terms`} target="_blank" className="font-semibold text-volt-soft underline">↗</Link>
               </span>
             </label>
-            {errors.accepted ? <span className="mt-1.5 block text-sm text-[#ff7a5c]">{errors.accepted}</span> : null}
+            {errors.accepted ? <span className="mt-1.5 block text-sm text-danger">{errors.accepted}</span> : null}
           </div>
         </>
       ) : null}
@@ -253,7 +253,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
           {step === 4 ? (loading ? t.creating : t.create) : t.next}
         </PrimaryButton>
       </div>
-      <p className="pt-2 text-center text-sm leading-relaxed text-white/60">
+      <p className="pt-2 text-center text-sm leading-relaxed text-fg/60">
         {t.haveAccount}{" "}
         <Link href={`/${lang}/login`} className="font-bold text-volt-soft hover:underline">{t.login}</Link>
       </p>

@@ -30,6 +30,18 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
     if (ready && user) router.replace(`/${lang}/dashboard`);
   }, [ready, user, lang, router]);
 
+  // The browser keeps this page alive after a login. When the person signs out and comes back, it must be a fresh form, not one still "loading".
+  useEffect(() => {
+    if (!ready || user) return;
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setLoading(false);
+    setPassword("");
+    setNeedsCode(false);
+    setDigits(Array(OTP_LENGTH).fill(""));
+    setError(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [ready, user]);
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     const missing: ("email" | "password")[] = [...(cleanEmail ? [] : ["email" as const]), ...(password ? [] : ["password" as const])];
@@ -70,7 +82,7 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
       <form onSubmit={verify} className="space-y-8">
         <div>
           <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-white/60">{t.notVerified}</p>
+          <p className="mt-3 leading-relaxed text-fg/60">{t.notVerified}</p>
           <p className="mt-1 font-semibold">{cleanEmail}</p>
         </div>
         <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
@@ -84,7 +96,7 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
     <form onSubmit={submit} className="space-y-7" noValidate>
       <div>
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{t.loginTitle}</h1>
-        <p className="mt-3 leading-relaxed text-white/60">{t.loginSubtitle}</p>
+        <p className="mt-3 leading-relaxed text-fg/60">{t.loginSubtitle}</p>
       </div>
       <Field label={t.email} error={error?.fields.includes("email") && !error.fields.includes("password") ? error.message : undefined}>
         <TextInput type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder={t.emailPlaceholder} autoComplete="email" autoCapitalize="none" invalid={!!error?.fields.includes("email")} />
@@ -96,10 +108,11 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
         <Link href={`/${lang}/forgot`} className="text-sm font-semibold text-volt-soft hover:underline">{t.forgot}</Link>
       </div>
       <PrimaryButton type="submit" loading={loading}>{loading ? t.signingIn : t.login}</PrimaryButton>
-      <p className="pt-2 text-center text-sm leading-relaxed text-white/60">
+      <p className="pt-2 text-center text-sm leading-relaxed text-fg/60">
         {t.noAccount}{" "}
         <Link href={`/${lang}/signup`} className="font-bold text-volt-soft hover:underline">{t.createAccount}</Link>
       </p>
+      <p className="border-t border-fg/10 pt-6 text-center text-sm leading-relaxed text-fg/50">{dict.dash.me.loginNote}</p>
     </form>
   );
 }

@@ -99,11 +99,11 @@ export default function CarForm() {
   }
 
   const toggle = (label: string) => setFeatures((f) => (f.includes(label) ? f.filter((x) => x !== label) : [...f, label]));
-  const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-semibold transition-colors ${on ? "bg-volt text-white" : "glass text-white/70 hover:bg-white/10"}`;
+  const chip = (on: boolean) => `rounded-full px-4 py-2 text-sm font-semibold transition-colors ${on ? "bg-volt text-white" : "glass text-fg/70 hover:bg-fg/10"}`;
 
   return (
     <form onSubmit={save} className="max-w-3xl space-y-8">
-      <Link href={`/${lang}/dashboard/fleet`} className="inline-flex items-center gap-2 text-sm font-semibold text-white/70 hover:text-white"><span className="rtl:rotate-180">←</span> {t.nav.fleet}</Link>
+      <Link href={`/${lang}/dashboard/fleet`} className="inline-flex items-center gap-2 text-sm font-semibold text-fg/70 hover:text-fg"><span className="rtl:rotate-180">←</span> {t.nav.fleet}</Link>
       <PageHeader title={carId ? t.fleet.editTitle : t.fleet.newTitle} subtitle={agency.approval_status === "pending" ? t.fleet.reviewNote : undefined} />
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -134,7 +134,7 @@ export default function CarForm() {
       </div>
 
       <div>
-        <p className="mb-3 text-xs font-bold uppercase tracking-wider text-white/60">{t.fleet.features}</p>
+        <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{t.fleet.features}</p>
         <div className="flex flex-wrap gap-2">
           {CAR_OPTIONS.map((o) => (
             <button key={o} type="button" onClick={() => toggle(o)} className={chip(features.includes(o))}>{labels.options[o] ?? o}</button>
@@ -143,26 +143,26 @@ export default function CarForm() {
       </div>
 
       <div>
-        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-white/60">{t.fleet.photos}</p>
-        <p className="mb-4 text-sm text-white/45">{t.fleet.photosHint}</p>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-fg/60">{t.fleet.photos}</p>
+        <p className="mb-4 text-sm text-fg/45">{t.fleet.photosHint}</p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {existing.map((url, i) => (
-            <div key={url} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-white/5">
+            <div key={url} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-fg/5">
               <Image src={url} alt="" fill sizes="200px" className="object-cover" />
-              {i === 0 ? <span className="absolute start-2 top-2 rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-bold">{t.fleet.mainPhoto}</span> : null}
-              <button type="button" onClick={() => setExisting((x) => x.filter((u) => u !== url))} aria-label={t.fleet.remove} className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/80 text-sm">×</button>
+              {i === 0 ? <span className="absolute start-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white">{t.fleet.mainPhoto}</span> : null}
+              <button type="button" onClick={() => setExisting((x) => x.filter((u) => u !== url))} aria-label={t.fleet.remove} className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-page/80 text-sm">×</button>
             </div>
           ))}
           {added.map((p, i) => (
-            <div key={p.preview} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-white/5">
+            <div key={p.preview} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-fg/5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.preview} alt="" className="h-full w-full object-cover" />
-              {existing.length === 0 && i === 0 ? <span className="absolute start-2 top-2 rounded-full bg-ink/80 px-2.5 py-1 text-[10px] font-bold">{t.fleet.mainPhoto}</span> : null}
-              <button type="button" onClick={() => setAdded((a) => a.filter((x) => x !== p))} aria-label={t.fleet.remove} className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/80 text-sm">×</button>
+              {existing.length === 0 && i === 0 ? <span className="absolute start-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold text-white">{t.fleet.mainPhoto}</span> : null}
+              <button type="button" onClick={() => setAdded((a) => a.filter((x) => x !== p))} aria-label={t.fleet.remove} className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-page/80 text-sm">×</button>
             </div>
           ))}
           {photoCount < MAX_PHOTOS ? (
-            <button type="button" onClick={() => fileInput.current?.click()} className="flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 text-sm font-semibold text-white/70 transition-colors hover:bg-white/5">
+            <button type="button" onClick={() => fileInput.current?.click()} className="flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-fg/20 text-sm font-semibold text-fg/70 transition-colors hover:bg-fg/5">
               <span className="text-2xl">+</span>{t.fleet.addPhotos}
             </button>
           ) : null}

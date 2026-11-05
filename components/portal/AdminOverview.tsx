@@ -99,7 +99,7 @@ export default function AdminOverview() {
   const queue = (kind: Kind) => `/${lang}/dashboard/review?kind=${kind}`;
   const diff = data.approvedWeek - data.approvedPrevWeek;
   const waitedHours = data.oldest ? (data.now - new Date(data.oldest.since).getTime()) / HOUR : 0;
-  const tone = { approved: "text-go bg-go/15", rejected: "text-[#ff8a6e] bg-[#ff5c3a]/15", new: "text-volt-soft bg-volt/20" } as const;
+  const tone = { approved: "text-go bg-go/15", rejected: "text-danger bg-[#ff5c3a]/15", new: "text-volt-soft bg-volt/20" } as const;
   const text = (e: Event) => fill(e.type === "approved" ? t.evApproved : e.type === "rejected" ? t.evRejected : t.evNew, { name: e.name });
   const heroTarget: Kind = data.byKind.customers > data.byKind.agencies ? "customers" : "agencies";
 
@@ -109,13 +109,13 @@ export default function AdminOverview() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* The number that matters, with the two queues underneath */}
-        <div className="relative isolate flex flex-col justify-between gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-volt-mid to-volt p-8 shadow-2xl shadow-volt/25 lg:col-span-2">
-          <span aria-hidden className="absolute -end-16 -top-16 -z-10 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+        <div className="on-volt relative isolate flex flex-col justify-between gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-volt-mid to-volt p-8 shadow-2xl shadow-volt/25 lg:col-span-2">
+          <span aria-hidden className="absolute -end-16 -top-16 -z-10 h-64 w-64 rounded-full bg-fg/10 blur-2xl" />
           <div className="flex items-center justify-between gap-6">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-white/75">{t.waitingForReview}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-fg/75">{t.waitingForReview}</p>
               <p className="font-display mt-2 text-7xl font-extrabold leading-none tracking-tight sm:text-8xl">{data.waiting}</p>
-              <p className="mt-3 text-sm text-white/75">{fill(t.withinDay, { percent: data.withinDay })}</p>
+              <p className="mt-3 text-sm text-fg/75">{fill(t.withinDay, { percent: data.withinDay })}</p>
             </div>
             <div className="relative h-20 w-20 shrink-0">
               <svg viewBox={`0 0 ${RING} ${RING}`} className="h-full w-full -rotate-90 rtl:rotate-90" aria-hidden>
@@ -127,9 +127,9 @@ export default function AdminOverview() {
           </div>
           <div className="flex flex-wrap gap-3">
             {(["agencies", "customers"] as const).map((k) => (
-              <Link key={k} href={queue(k)} className={`flex items-center gap-3 rounded-full py-2.5 pe-3 ps-5 font-bold transition-colors ${k === heroTarget ? "bg-white text-ink" : "bg-white/15 hover:bg-white/25"}`}>
+              <Link key={k} href={queue(k)} className={`flex items-center gap-3 rounded-full py-2.5 pe-3 ps-5 font-bold transition-colors ${k === heroTarget ? "bg-fg text-page" : "bg-fg/15 hover:bg-fg/25"}`}>
                 {t[k]}
-                <span className={`min-w-7 rounded-full px-2.5 py-0.5 text-center text-sm ${k === heroTarget ? "bg-volt/20 text-volt-mid" : "bg-white/20"}`}>{data.byKind[k]}</span>
+                <span className={`min-w-7 rounded-full px-2.5 py-0.5 text-center text-sm ${k === heroTarget ? "bg-volt/20 text-volt-mid" : "bg-fg/20"}`}>{data.byKind[k]}</span>
               </Link>
             ))}
           </div>
@@ -137,40 +137,40 @@ export default function AdminOverview() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
           <div className="glass rounded-[2rem] p-6">
-            <p className="text-xs font-bold uppercase tracking-wider text-white/55">{t.approvedWeek}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-fg/55">{t.approvedWeek}</p>
             <p className="font-display mt-2 text-5xl font-extrabold tracking-tight">{data.approvedWeek}</p>
-            <p className={`mt-1 text-sm font-bold ${diff >= 0 ? "text-go" : "text-[#ff8a6e]"}`}>{fill(t.vsLastWeek, { diff: `${diff >= 0 ? "+" : ""}${diff}` })}</p>
+            <p className={`mt-1 text-sm font-bold ${diff >= 0 ? "text-go" : "text-danger"}`}>{fill(t.vsLastWeek, { diff: `${diff >= 0 ? "+" : ""}${diff}` })}</p>
           </div>
           <div className="glass rounded-[2rem] p-6">
-            <p className="text-xs font-bold uppercase tracking-wider text-white/55">{t.avgReview}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-fg/55">{t.avgReview}</p>
             <p className="font-display mt-2 text-5xl font-extrabold tracking-tight">{data.avgHours === null ? "—" : duration(data.avgHours)}</p>
-            <p className="mt-1 text-sm text-white/55">{t.target}</p>
+            <p className="mt-1 text-sm text-fg/55">{t.target}</p>
           </div>
         </div>
       </div>
 
       {data.oldest && waitedHours >= 24 ? (
-        <Link href={link(data.oldest)} className="mt-4 flex items-center gap-3 rounded-3xl border border-[#ffd166]/35 bg-[#ffd166]/10 p-5 transition-colors hover:bg-[#ffd166]/15">
-          <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-[#ffd166]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        <Link href={link(data.oldest)} className="mt-4 flex items-center gap-3 rounded-3xl border border-warn/35 bg-warn/10 p-5 transition-colors hover:bg-warn/15">
+          <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-warn" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
           <span className="flex-1 font-semibold">{fill(t.oldestAlert, { name: data.oldest.name, time: duration(waitedHours) })}</span>
-          <span aria-hidden className="text-white/50 rtl:rotate-180">→</span>
+          <span aria-hidden className="text-fg/50 rtl:rotate-180">→</span>
         </Link>
       ) : null}
 
       <div className="mt-10">
         <section>
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-white/55">{t.recentActivity}</h2>
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-fg/55">{t.recentActivity}</h2>
           {data.activity.length === 0 ? (
-            <div className="rounded-[2rem] border border-dashed border-white/15 p-10 text-center text-white/55">{t.nothingHere}</div>
+            <div className="rounded-[2rem] border border-dashed border-fg/15 p-10 text-center text-fg/55">{t.nothingHere}</div>
           ) : (
-            <div className="glass divide-y divide-white/10 rounded-[2rem] px-6">
+            <div className="glass divide-y divide-fg/10 rounded-[2rem] px-6">
               {data.activity.map((e) => (
                 <Link key={`${e.kind}-${e.id}-${e.type}-${e.at}`} href={link(e)} className="flex items-center gap-4 py-4 transition-colors hover:text-volt-soft">
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${tone[e.type]}`}>
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={e.type === "approved" ? CHECK : e.type === "rejected" ? CROSS : PLUS} /></svg>
                   </span>
                   <span className="min-w-0 flex-1 truncate">{text(e)}</span>
-                  <span className="text-sm text-white/45">{ago(e.at)}</span>
+                  <span className="text-sm text-fg/45">{ago(e.at)}</span>
                 </Link>
               ))}
             </div>

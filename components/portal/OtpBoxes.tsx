@@ -45,7 +45,7 @@ export default function OtpBoxes({ digits, onChange, label }: { digits: string[]
             }
           }}
           onFocus={(e) => e.target.select()}
-          className={`h-16 w-full min-w-0 rounded-2xl border bg-white/5 text-center text-2xl font-bold text-white outline-none transition-colors focus:border-volt focus:bg-white/10 ${d ? "border-volt/60 bg-volt/10" : "border-white/15"}`}
+          className={`h-16 w-full min-w-0 rounded-2xl border bg-fg/5 text-center text-2xl font-bold text-fg outline-none transition-colors focus:border-volt focus:bg-fg/10 ${d ? "border-volt/60 bg-volt/10" : "border-fg/15"}`}
         />
       ))}
     </div>

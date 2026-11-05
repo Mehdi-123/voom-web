@@ -42,9 +42,9 @@ export default function ReviewQueue() {
     return () => { current = false; };
   }, [kind, status, role]);
 
-  if (role !== "admin") return <p className="text-white/70">{t.notAdmin}</p>;
+  if (role !== "admin") return <p className="text-fg/70">{t.notAdmin}</p>;
 
-  const pill = (on: boolean) => `shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${on ? "bg-white text-ink" : "glass text-white/75 hover:bg-white/10"}`;
+  const pill = (on: boolean) => `shrink-0 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${on ? "bg-fg text-page" : "glass text-fg/75 hover:bg-fg/10"}`;
 
   return (
     <>
@@ -59,13 +59,13 @@ export default function ReviewQueue() {
       {rows === null ? <Loading /> : rows.length === 0 ? <Empty>{t.empty}</Empty> : (
         <div className="space-y-3">
           {rows.map((r) => (
-            <Link key={r.id} href={`/${lang}/dashboard/review/${kind === "agencies" ? "agency" : "customer"}/${r.id}`} className="glass flex items-center gap-4 rounded-3xl p-5 transition-colors hover:bg-white/10">
+            <Link key={r.id} href={`/${lang}/dashboard/review/${kind === "agencies" ? "agency" : "customer"}/${r.id}`} className="glass flex items-center gap-4 rounded-3xl p-5 transition-colors hover:bg-fg/10">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-volt/20 font-display text-xl font-extrabold text-volt-soft">{r.name.charAt(0).toUpperCase()}</span>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{r.name}</p>
-                <p className="truncate text-sm text-white/55">{r.line}</p>
+                <p className="truncate text-sm text-fg/55">{r.line}</p>
               </div>
-              <span className="text-sm text-white/45">{shortDate(r.since, lang)}</span>
+              <span className="text-sm text-fg/45">{shortDate(r.since, lang)}</span>
             </Link>
           ))}
         </div>

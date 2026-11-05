@@ -6,7 +6,7 @@ const en: Dictionary = {
     siteTitle: "Voom, car rental in Morocco",
     siteDescription: "Rent a car from verified agencies in cities across Morocco. Pick a car, book in minutes and pay on site, in dirhams.",
   },
-  nav: { cities: "Cities", agencies: "Agencies", download: "Get the app", language: "Language", menu: "Menu" },
+  nav: { cities: "Cities", agencies: "Agencies", download: "Get the app", language: "Language", menu: "Menu", account: "My space" },
   hero: {
     eyebrow: "Car rental in Morocco",
     title: "Rent the car you need, in minutes.",

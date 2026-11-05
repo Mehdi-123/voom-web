@@ -10,9 +10,8 @@ import Faq from "@/components/Faq";
 import Reveal from "@/components/Reveal";
 import Words from "@/components/Words";
 import Marquee from "@/components/Marquee";
-import PhoneMockup from "@/components/PhoneMockup";
+import AppPhone from "@/components/AppPhone";
 import StoryScroll from "@/components/StoryScroll";
-import { ConfirmedScreen, ExploreScreen, RequestScreen } from "@/components/AppScreens";
 import { ArrowIcon } from "@/components/Icons";
 import { Banknotes, IdScan, PhoneBooking, VerifiedStamp, WhyCard } from "@/components/WhyVisuals";
 
@@ -24,12 +23,17 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
   const cars = await getCars({ limit: 8 });
-  const screens = [ExploreScreen, RequestScreen, ConfirmedScreen];
+  // Real screenshots of the app, in the order of the three steps
+  const storyPhones = [
+    { shot: "car", alt: dict.how.steps[0].title },
+    { shot: "book-dates", alt: dict.how.steps[1].title },
+    { shot: "booking", alt: dict.mock.confirmed },
+  ];
 
   return (
     <>
       {/* ── Hero ── */}
-      <section className="night grain relative isolate overflow-hidden">
+      <section className="night grain relative isolate z-10 overflow-x-clip">
         <div aria-hidden className="parallax pointer-events-none absolute inset-0 -z-10">
           <span className="sweep top-[22%] w-[38rem]" style={{ animationDelay: "0s" }} />
           <span className="sweep top-[48%] w-[26rem]" style={{ animationDelay: "1.8s", opacity: 0.6 }} />
@@ -53,13 +57,13 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             </Reveal>
           </div>
 
-          <Reveal variant="side" delay={300} className="relative hidden lg:block">
-            <div className="float [--r:4deg]"><PhoneMockup><ExploreScreen dict={dict} lang={lang} /></PhoneMockup></div>
-            <div className="glass float absolute -start-10 top-24 rounded-2xl px-4 py-3 text-sm font-bold [--r:-4deg]" style={{ animationDelay: "-2s" }}>
+          <Reveal variant="side" delay={300} className="relative mx-auto w-full max-w-sm lg:max-w-none">
+            <div className="float [--r:4deg]"><AppPhone shot="home" alt={dict.mock.explore} priority /></div>
+            <div className="glass float absolute start-0 top-24 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:-4deg] sm:-start-6 sm:block lg:-start-10" style={{ animationDelay: "-2s" }}>
               <span className="text-go">✓</span> {dict.mock.chipConfirmed}
             </div>
-            <div className="glass float absolute -end-6 bottom-28 rounded-2xl px-4 py-3 text-sm font-bold [--r:3deg]" style={{ animationDelay: "-4s" }}>
-              250 MAD <span className="font-normal text-white/60">{dict.mock.perDay}</span>
+            <div className="glass float absolute end-0 bottom-28 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:3deg] sm:-end-6 sm:block" style={{ animationDelay: "-4s" }}>
+              350 MAD <span className="font-normal text-white/60">{dict.mock.perDay}</span>
             </div>
           </Reveal>
         </div>
@@ -74,7 +78,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           <div className="mt-6">
             <StoryScroll
               steps={dict.how.steps}
-              phones={screens.map((Screen, i) => <PhoneMockup key={i}><Screen dict={dict} lang={lang} /></PhoneMockup>)}
+              phones={storyPhones.map((p) => <AppPhone key={p.shot} shot={p.shot} alt={p.alt} />)}
             />
           </div>
         </div>
@@ -184,7 +188,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             <div className="mt-10"><StoreBadges dict={dict} /></div>
           </Reveal>
           <Reveal variant="side" className="flex justify-center">
-            <div className="float [--r:-3deg]"><PhoneMockup><ConfirmedScreen dict={dict} lang={lang} /></PhoneMockup></div>
+            <div className="float [--r:-3deg]"><AppPhone shot="browse" alt={dict.mock.explore} /></div>
           </Reveal>
         </div>
       </section>

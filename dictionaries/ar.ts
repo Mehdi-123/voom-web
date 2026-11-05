@@ -6,7 +6,7 @@ const ar: Dictionary = {
     siteTitle: "Voom، كراء السيارات في المغرب",
     siteDescription: "اكترِ سيارة من وكالات موثّقة في مدن المغرب. اختر سيارتك، احجز في دقائق وادفع في عين المكان بالدرهم.",
   },
-  nav: { cities: "المدن", agencies: "الوكالات", download: "حمّل التطبيق", language: "اللغة", menu: "القائمة" },
+  nav: { cities: "المدن", agencies: "الوكالات", download: "حمّل التطبيق", language: "اللغة", menu: "القائمة", account: "مساحتي" },
   hero: {
     eyebrow: "كراء السيارات في المغرب",
     title: "اكترِ السيارة التي تحتاجها في دقائق.",
