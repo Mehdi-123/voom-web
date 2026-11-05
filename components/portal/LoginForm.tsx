@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n";
 import { sb } from "@/lib/supabase-browser";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { useAuth } from "./AuthProvider";
+import { readNext, useNextSuffix } from "@/lib/next-path";
 import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 
@@ -24,10 +25,12 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
 
   const cleanEmail = email.trim().toLowerCase();
+  const nextSuffix = useNextSuffix(lang);
+  const destination = () => readNext(lang) ?? `/${lang}/dashboard`;
 
   // Someone already signed in goes straight to the dashboard
   useEffect(() => {
-    if (ready && user) router.replace(`/${lang}/dashboard`);
+    if (ready && user) router.replace(readNext(lang) ?? `/${lang}/dashboard`);
   }, [ready, user, lang, router]);
 
   // The browser keeps this page alive after a login. When the person signs out and comes back, it must be a fresh form, not one still "loading".
@@ -62,7 +65,7 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
       setLoading(false);
       return;
     }
-    router.replace(`/${lang}/dashboard`);
+    router.replace(destination());
   }
 
   async function verify(e: FormEvent) {
@@ -74,7 +77,7 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
     if (err) ({ error: err } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "signup" }));
     setLoading(false);
     if (err) { setError({ message: t.wrongCode, fields: [] }); setDigits(Array(OTP_LENGTH).fill("")); return; }
-    router.replace(`/${lang}/dashboard`);
+    router.replace(destination());
   }
 
   if (needsCode) {
@@ -110,9 +113,8 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
       <PrimaryButton type="submit" loading={loading}>{loading ? t.signingIn : t.login}</PrimaryButton>
       <p className="pt-2 text-center text-sm leading-relaxed text-fg/60">
         {t.noAccount}{" "}
-        <Link href={`/${lang}/signup`} className="font-bold text-volt-soft hover:underline">{t.createAccount}</Link>
+        <Link href={`/${lang}/signup${nextSuffix}`} className="font-bold text-volt-soft hover:underline">{t.createAccount}</Link>
       </p>
-      <p className="border-t border-fg/10 pt-6 text-center text-sm leading-relaxed text-fg/50">{dict.dash.me.loginNote}</p>
     </form>
   );
 }

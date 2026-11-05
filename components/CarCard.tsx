@@ -18,7 +18,7 @@ export default function CarCard({ car, lang, dict, className = "" }: { car: Car;
   return (
     <Link
       href={`/${lang}/cars/${car.id}`}
-      className={`group flex flex-col overflow-hidden rounded-[2rem] bg-white text-ink shadow-xl shadow-black/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-volt/30 ${className}`}
+      className={`group flex flex-col overflow-hidden rounded-[2rem] bg-white text-ink shadow-xl shadow-black/10 transition-all duration-500 active:scale-[0.98] [@media(hover:hover)]:hover:-translate-y-2 [@media(hover:hover)]:hover:shadow-2xl [@media(hover:hover)]:hover:shadow-volt/30 ${className}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-paper">
         {photo ? (

@@ -12,6 +12,7 @@ import Words from "@/components/Words";
 import Marquee from "@/components/Marquee";
 import AppPhone from "@/components/AppPhone";
 import StoryScroll from "@/components/StoryScroll";
+import ScrollTop from "@/components/ScrollTop";
 import { ArrowIcon } from "@/components/Icons";
 import { Banknotes, IdScan, PhoneBooking, VerifiedStamp, WhyCard } from "@/components/WhyVisuals";
 
@@ -117,9 +118,10 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             <Reveal>
               <h2 className="font-display text-5xl font-extrabold tracking-tight sm:text-7xl">{dict.popular.title}</h2>
               <p className="mt-4 text-lg text-muted">{dict.popular.subtitle}</p>
+              <Link href={`/${lang}/cars`} className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-bold text-white transition-colors hover:bg-volt">{dict.catalog.seeAll} <ArrowIcon className="h-4 w-4 rtl:rotate-180" /></Link>
             </Reveal>
           </div>
-          <div className="no-scrollbar mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-8 scroll-ps-5 sm:px-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))] sm:scroll-ps-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))]">
+          <div className="no-scrollbar -mb-10 mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-16 pt-6 scroll-ps-5 sm:px-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))] sm:scroll-ps-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))]">
             {cars.map((car) => (
               <CarCard key={car.id} car={car} lang={lang} dict={dict} className="w-[82vw] shrink-0 snap-start sm:w-[22rem]" />
             ))}
@@ -192,6 +194,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           </Reveal>
         </div>
       </section>
+      <ScrollTop label={dict.nav.top} />
     </>
   );
 }

@@ -35,7 +35,7 @@ export default function CustomerProfile() {
     <>
       <button type="button" onClick={() => router.back()} className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-fg/70 hover:text-fg"><span className="rtl:rotate-180">←</span> {t.back}</button>
       <div className="flex items-center gap-5">
-        <Initial name={data.name} className="mb-8 h-20 w-20 text-4xl" />
+        <Initial name={data.name} src={data.avatar_url} className="mb-8 h-20 w-20 text-4xl" />
         <PageHeader title={data.name ?? t.title} subtitle={data.member_since ? `${t.memberSince} ${shortDate(data.member_since, lang)}` : undefined} />
       </div>
 

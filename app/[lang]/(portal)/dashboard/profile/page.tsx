@@ -1,10 +1,8 @@
-"use client";
+import ProfileRoute from "@/components/portal/ProfileRoute";
 
-import { useAuth } from "@/components/portal/AuthProvider";
-import AgencyProfile from "@/components/portal/AgencyProfile";
-import MyProfile from "@/components/portal/MyProfile";
+// Depends on who is signed in, which only the browser knows: no instant-navigation check
+export const instant = false;
 
-export default function ProfilePage() {
-  const { role } = useAuth();
-  return role === "customer" ? <MyProfile /> : <AgencyProfile />;
+export default function Page() {
+  return <ProfileRoute />;
 }

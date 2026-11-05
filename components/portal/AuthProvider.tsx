@@ -54,22 +54,20 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     }
     const user = session.user;
     const { data: isAdmin } = await sb.rpc("is_admin");
-    const role = isAdmin === true ? "admin" : user.user_metadata?.role === "agency" ? "agency" : "customer";
-    let agency: Agency | null = null;
-    if (role === "agency") {
-      const { data } = await sb
-        .from("agencies")
-        .select("id, name, city, phone, email, address, logo_url, registration_number, approval_status, rejection_reason")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      agency = (data as Agency | null) ?? null;
-    }
+    // An agency is whoever owns a row in the agencies table (the sign-up label alone can be missing on accounts created by hand)
+    const { data: agencyRow } = await sb
+      .from("agencies")
+      .select("id, name, city, phone, email, address, logo_url, registration_number, approval_status, rejection_reason")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const agency = (agencyRow as Agency | null) ?? null;
+    const role = isAdmin === true ? "admin" : agency || user.user_metadata?.role === "agency" ? "agency" : "customer";
     let renter: Renter | null = null;
     let identity: Identity | null = null;
-    if (role === "customer") {
+    if (role === "customer" || role === "admin") {
       const [profile, docs] = await Promise.all([
         sb.from("profiles").select("name, phone, avatar_url, strike_count").eq("id", user.id).maybeSingle(),
-        sb.from("customer_documents").select("status, rejection_reason").eq("user_id", user.id).maybeSingle(),
+        role === "customer" ? sb.from("customer_documents").select("status, rejection_reason").eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
       ]);
       const row = profile.data as Partial<Renter> | null;
       renter = {
@@ -78,8 +76,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         avatar_url: row?.avatar_url ?? null,
         strike_count: row?.strike_count ?? 0,
       };
-      const d = docs.data as { status: Approval; rejection_reason: string | null } | null;
-      identity = { status: d?.status ?? "none", reason: d?.rejection_reason ?? null };
+      if (role === "customer") {
+        const d = docs.data as { status: Approval; rejection_reason: string | null } | null;
+        identity = { status: d?.status ?? "none", reason: d?.rejection_reason ?? null };
+      }
     }
     setState({ ready: true, user, role, agency, renter, identity });
   }, []);

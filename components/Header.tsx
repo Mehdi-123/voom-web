@@ -10,6 +10,7 @@ import AccountLink from "./AccountLink";
 /** A glass pill floating over the page: logo, links, language. */
 export default function Header({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const links = [
+    { href: `/${lang}/cars`, label: dict.nav.cars },
     { href: `/${lang}#cities`, label: dict.nav.cities },
     { href: `/${lang}/agencies`, label: dict.nav.agencies },
   ];

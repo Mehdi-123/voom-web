@@ -13,7 +13,7 @@ import { useDash } from "./DashContext";
 import { BookingProgress, Card, Initial, Loading, PageHeader, StatusBadge, shortDate } from "./dash-ui";
 import { ErrorNote, GhostButton, PrimaryButton } from "./ui";
 
-type Customer = { name: string | null; phone: string | null; strike_count: number | null };
+type Customer = { name: string | null; phone: string | null; strike_count: number | null; avatar_url: string | null };
 type Extra = { cancelled_by: string | null };
 type Review = { id: string; rating: number; comment: string | null };
 type Action = { key: string; label: string; run: () => PromiseLike<{ error: { message: string } | null }>; confirm?: string; danger?: boolean };
@@ -44,7 +44,7 @@ export default function BookingDetail() {
     const row = data as unknown as BookingRow & Extra;
     setBooking({ ...row, customer: null });
     setExtra({ cancelled_by: row.cancelled_by ?? null });
-    const { data: profile } = await sb.from("profiles").select("name, phone, strike_count").eq("id", row.customer_id).maybeSingle();
+    const { data: profile } = await sb.from("profiles").select("name, phone, strike_count, avatar_url").eq("id", row.customer_id).maybeSingle();
     setCustomer((profile as Customer | null) ?? null);
     if (row.status === "completed" && user) {
       const { data: mine } = await sb.from("reviews").select("id, rating, comment").eq("booking_id", id).eq("author_id", user.id).eq("reviewer_type", "agency").maybeSingle();
@@ -129,7 +129,7 @@ export default function BookingDetail() {
           {/* Who is renting */}
           <Card>
             <div className="flex flex-wrap items-center gap-4">
-              <Initial name={customer?.name} className="h-14 w-14 text-2xl" />
+              <Initial name={customer?.name} src={customer?.avatar_url} className="h-14 w-14 text-2xl" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-bold">{customer?.name ?? b.unknownCustomer}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-2">

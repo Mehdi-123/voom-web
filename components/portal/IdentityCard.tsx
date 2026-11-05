@@ -3,8 +3,9 @@
 import { ShieldIcon } from "@/components/Icons";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
+import IdentityUpload from "./IdentityUpload";
 
-/** Where the renter's identity check stands. Booking is only possible once it is approved, and that happens in the app. */
+/** Where the renter's identity check stands, with the upload form while documents are missing or refused. Booking is only possible once they are approved. */
 export default function IdentityCard() {
   const { identity } = useAuth();
   const { dict } = useDash();
@@ -18,14 +19,19 @@ export default function IdentityCard() {
     rejected: { title: m.idRejected, text: m.idRejectedText, tone: "border-danger/40 bg-danger/10", icon: "bg-danger/20 text-danger" },
   }[identity.status];
 
+  const needsDocs = identity.status === "none" || identity.status === "rejected";
+
   return (
-    <div className={`flex items-start gap-4 rounded-3xl border p-5 ${view.tone}`}>
-      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${view.icon}`}><ShieldIcon className="h-5 w-5" /></span>
-      <div className="min-w-0">
-        <p className="font-bold">{view.title}</p>
-        <p className="mt-1 text-sm text-fg/70">{view.text}</p>
-        {identity.status === "rejected" && identity.reason ? <p className="mt-2 text-sm"><span className="font-semibold">{m.idReason}:</span> {identity.reason}</p> : null}
+    <div className={`rounded-3xl border p-5 ${view.tone}`}>
+      <div className="flex items-start gap-4">
+        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${view.icon}`}><ShieldIcon className="h-5 w-5" /></span>
+        <div className="min-w-0">
+          <p className="font-bold">{view.title}</p>
+          <p className="mt-1 text-sm text-fg/70">{view.text}</p>
+          {identity.status === "rejected" && identity.reason ? <p className="mt-2 text-sm"><span className="font-semibold">{m.idReason}:</span> {identity.reason}</p> : null}
+        </div>
       </div>
+      {needsDocs ? <IdentityUpload /> : null}
     </div>
   );
 }

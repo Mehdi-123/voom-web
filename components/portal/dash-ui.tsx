@@ -1,4 +1,7 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, useState } from "react";
+import Image from "next/image";
 import { StarIcon } from "@/components/Icons";
 import { Spinner } from "./ui";
 
@@ -18,12 +21,17 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   return <div className={`glass rounded-3xl p-6 ${className}`}>{children}</div>;
 }
 
-export function Stat({ label, value, tone = "default" }: { label: string; value: ReactNode; tone?: "default" | "accent" | "good" }) {
+export function Stat({ label, value, tone = "default", icon, hint }: { label: string; value: ReactNode; tone?: "default" | "accent" | "good"; icon?: ReactNode; hint?: ReactNode }) {
   const toneClass = tone === "accent" ? "on-volt bg-gradient-to-br from-volt-deep to-volt-mid border-transparent" : "glass";
+  const chip = tone === "accent" ? "bg-white/15 text-white" : tone === "good" ? "bg-go/15 text-go" : "bg-volt/15 text-volt-soft";
   return (
-    <div className={`rounded-3xl border border-fg/10 p-6 ${toneClass}`}>
-      <p className="text-xs font-bold uppercase tracking-wider text-fg/60">{label}</p>
+    <div className={`@container min-w-0 rounded-3xl border border-white/10 p-6 ${toneClass}`}>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-bold uppercase tracking-wider text-fg/60">{label}</p>
+        {icon ? <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${chip}`}>{icon}</span> : null}
+      </div>
       <p className={`font-display mt-3 whitespace-nowrap text-[clamp(1.4rem,13cqw,2.25rem)] font-extrabold leading-tight tracking-tight ${tone === "good" ? "text-go" : ""}`}>{value}</p>
+      {hint ? <p className="mt-1 text-xs font-semibold text-fg/55">{hint}</p> : null}
     </div>
   );
 }
@@ -75,8 +83,16 @@ export function Stars({ value, className = "h-4 w-4" }: { value: number; classNa
   );
 }
 
-/** A round badge with a person's or agency's first letter. */
-export function Initial({ name, className = "h-12 w-12 text-xl" }: { name: string | null | undefined; className?: string }) {
+/** A round badge: the photo when there is one, otherwise the first letter of the name. */
+export function Initial({ name, src, className = "h-12 w-12 text-xl" }: { name: string | null | undefined; src?: string | null; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
+    return (
+      <span className={`relative block shrink-0 overflow-hidden rounded-full bg-fg/10 ${className}`}>
+        <Image src={src} alt="" fill sizes="96px" unoptimized className="object-cover" onError={() => setFailed(true)} />
+      </span>
+    );
+  }
   return <span className={`flex shrink-0 items-center justify-center rounded-full bg-volt/20 font-display font-extrabold text-volt-soft ${className}`}>{(name ?? "?").trim().charAt(0).toUpperCase() || "?"}</span>;
 }
 
@@ -90,8 +106,8 @@ export function BookingProgress({ status, labels }: { status: string; labels: [s
       {STEPS.map((step, i) => (
         <li key={step} className="flex flex-1 flex-col items-center gap-2 text-center">
           <span className="relative flex w-full items-center justify-center">
-            {i > 0 ? <span aria-hidden className={`absolute end-1/2 top-1/2 h-0.5 w-full -translate-y-1/2 ${i <= index ? "bg-go" : "bg-fg/15"}`} /> : null}
-            <span className={`relative flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${i <= index ? "bg-go text-white" : "border-2 border-fg/20 text-fg/40"}`}>{i <= index ? "✓" : i + 1}</span>
+            {i > 0 ? <span aria-hidden className={`absolute end-1/2 top-1/2 z-0 h-0.5 w-full -translate-y-1/2 ${i <= index ? "bg-go" : "bg-fg/15"}`} /> : null}
+            <span className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${i <= index ? "bg-go text-white" : "border-2 border-fg/20 bg-night text-fg/40"}`}>{i <= index ? "✓" : i + 1}</span>
           </span>
           <span className={`text-xs font-semibold ${i <= index ? "" : "text-fg/45"}`}>{labels[i]}</span>
         </li>

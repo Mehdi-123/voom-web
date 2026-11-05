@@ -4,6 +4,9 @@ import { getDictionary, hasLocale } from "@/lib/i18n";
 import DashboardShell from "@/components/portal/DashboardShell";
 import { Loading } from "@/components/portal/dash-ui";
 
+// Depends on who is signed in, which only the browser knows: no instant-navigation check
+export const instant = false;
+
 export default async function DashboardLayout({ children, params }: { children: React.ReactNode; params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();

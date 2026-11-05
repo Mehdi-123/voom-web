@@ -6,11 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { sb } from "@/lib/supabase-browser";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
-import { Empty, Loading, PageHeader, shortDate } from "./dash-ui";
+import { Empty, Initial, Loading, PageHeader, shortDate } from "./dash-ui";
 
 type Kind = "agencies" | "customers";
 type Status = "pending" | "approved" | "rejected";
-type Row = { id: string; name: string; line: string; since: string };
+type Row = { id: string; name: string; line: string; since: string; photo: string | null };
 
 const STATUSES: Status[] = ["pending", "approved", "rejected"];
 
@@ -30,12 +30,12 @@ export default function ReviewQueue() {
     const load = async () => {
       const asc = status === "pending";
       if (kind === "agencies") {
-        const { data } = await sb.from("agencies").select("id, name, city, registration_number, created_at").eq("approval_status", status).order("created_at", { ascending: asc });
-        if (current) setRows((data ?? []).map((a) => ({ id: a.id, name: a.name, line: [a.city, a.registration_number].filter(Boolean).join(" · "), since: a.created_at })));
+        const { data } = await sb.from("agencies").select("id, name, city, registration_number, created_at, logo_url").eq("approval_status", status).order("created_at", { ascending: asc });
+        if (current) setRows((data ?? []).map((a) => ({ id: a.id, name: a.name, line: [a.city, a.registration_number].filter(Boolean).join(" · "), since: a.created_at, photo: (a as { logo_url?: string | null }).logo_url ?? null })));
       } else {
-        const { data } = await sb.from("customer_documents").select("user_id, submitted_at, profiles(name, phone)").eq("status", status).order("submitted_at", { ascending: asc });
-        const list = (data ?? []) as unknown as { user_id: string; submitted_at: string; profiles: { name: string | null; phone: string | null } | null }[];
-        if (current) setRows(list.map((c) => ({ id: c.user_id, name: c.profiles?.name ?? "—", line: c.profiles?.phone ?? "", since: c.submitted_at })));
+        const { data } = await sb.from("customer_documents").select("user_id, submitted_at, profiles(name, phone, avatar_url)").eq("status", status).order("submitted_at", { ascending: asc });
+        const list = (data ?? []) as unknown as { user_id: string; submitted_at: string; profiles: { name: string | null; phone: string | null; avatar_url: string | null } | null }[];
+        if (current) setRows(list.map((c) => ({ id: c.user_id, name: c.profiles?.name ?? "—", line: c.profiles?.phone ?? "", since: c.submitted_at, photo: c.profiles?.avatar_url ?? null })));
       }
     };
     load();
@@ -60,7 +60,7 @@ export default function ReviewQueue() {
         <div className="space-y-3">
           {rows.map((r) => (
             <Link key={r.id} href={`/${lang}/dashboard/review/${kind === "agencies" ? "agency" : "customer"}/${r.id}`} className="glass flex items-center gap-4 rounded-3xl p-5 transition-colors hover:bg-fg/10">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-volt/20 font-display text-xl font-extrabold text-volt-soft">{r.name.charAt(0).toUpperCase()}</span>
+              <Initial name={r.name} src={r.photo} className="h-12 w-12 text-xl" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{r.name}</p>
                 <p className="truncate text-sm text-fg/55">{r.line}</p>

@@ -17,7 +17,7 @@ export default async function ForgotPage({ params }: Props) {
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
   return (
-    <AuthShell lang={lang}>
+    <AuthShell lang={lang} back={dict.dash.auth.backToLogin} backHref={`/${lang}/login`}>
       <ForgotForm lang={lang} dict={dict} />
     </AuthShell>
   );

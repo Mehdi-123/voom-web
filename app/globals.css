@@ -28,6 +28,11 @@
 
 html { scroll-behavior: smooth; }
 
+/* A picture inside a link or button is part of the click: it must not start a drag or get selected */
+a img, button img { -webkit-user-drag: none; user-select: none; }
+/* Links are draggable by default: a click with a small wobble became a drag and never reached the link */
+a[aria-label="Voom"], a:has(img) { -webkit-user-drag: none; user-select: none; }
+
 /* Anything you can press shows it */
 a[href], button:not(:disabled), summary, select, label[for], [role="button"], input[type="checkbox"], input[type="radio"], input[type="file"] { cursor: pointer; }
 button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
@@ -43,8 +48,6 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
   --color-warn: #9a6700;
   --color-danger: #d23a1d;
   --color-info: #1f6fd1;
-  background: var(--color-page);
-  color: var(--color-fg);
 }
 .dash-light .glass {
   background: #ffffff;
@@ -56,6 +59,10 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
   background: radial-gradient(70% 40% at 100% 0%, rgba(162, 89, 255, 0.14), transparent 70%), #ffffff;
   border-color: rgba(20, 18, 31, 0.08);
 }
+/* A soft glow without a blur filter: a filtered child is not clipped by a rounded parent, and leaves a square at the corner */
+.glow-blob { background: radial-gradient(closest-side, rgba(255, 255, 255, 0.22), transparent); }
+/* Dim and blur the page behind a dialog */
+.scrim { background: rgba(8, 7, 16, 0.38); backdrop-filter: blur(10px); }
 /* A coloured surface keeps white text in both themes */
 .on-volt { --color-fg: #ffffff; --color-page: #0b0a14; color: #ffffff; }
 

@@ -4,10 +4,21 @@ import Logo from "@/components/Logo";
 import type { Locale } from "@/lib/i18n";
 
 /** Centered card on the night background, for sign in, sign up and password reset. */
-export function AuthShell({ lang, children, wide = false }: { lang: Locale; children: ReactNode; wide?: boolean }) {
+export function AuthShell({ lang, children, wide = false, back, backHref }: { lang: Locale; children: ReactNode; wide?: boolean; back?: string; backHref?: string }) {
   return (
-    <div className="night grain relative isolate flex min-h-screen flex-col items-center overflow-hidden px-5 py-12 sm:py-16">
-      <Link href={`/${lang}`} aria-label="Voom" className="mb-12"><Logo tone="white" height={30} /></Link>
+    <div className="night grain relative isolate flex min-h-screen flex-col items-center overflow-hidden px-5 py-8 sm:px-8 sm:py-10">
+      {/* One row: the way back on the far left, the logo in the middle */}
+      <div className="mb-10 grid w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center sm:mb-14">
+        <div>
+          {back ? (
+            <Link href={backHref ?? `/${lang}`} aria-label={back} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:px-5">
+              <span aria-hidden className="rtl:rotate-180">←</span><span className="hidden sm:inline">{back}</span>
+            </Link>
+          ) : null}
+        </div>
+        <Link href={`/${lang}`} aria-label="Voom"><Logo tone="white" height={44} /></Link>
+        <span />
+      </div>
       <div className={`glass w-full rounded-[2rem] p-8 shadow-2xl shadow-black/40 sm:p-12 ${wide ? "max-w-2xl" : "max-w-md"}`}>{children}</div>
     </div>
   );
@@ -53,6 +64,19 @@ export function GhostButton({ children, className = "", ...props }: ButtonHTMLAt
     <button {...props} className={`flex h-14 items-center justify-center rounded-2xl border border-fg/15 px-6 text-base font-semibold text-fg transition-colors hover:bg-fg/10 disabled:opacity-40 ${className}`}>
       {children}
     </button>
+  );
+}
+
+/** A tick box in the brand style: a rounded square that fills with purple when checked. */
+export function Checkbox({ checked, onChange, invalid, children }: { checked: boolean; onChange: (checked: boolean) => void; invalid?: boolean; children: ReactNode }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3.5">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+      <span aria-hidden className={`mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-fg/5 text-transparent transition-colors peer-checked:border-volt peer-checked:bg-volt peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-volt/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-page ${invalid ? "border-danger" : "border-fg/30 hover:border-fg/50"}`}>
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+      </span>
+      <span className="text-sm leading-relaxed text-fg/80">{children}</span>
+    </label>
   );
 }
 

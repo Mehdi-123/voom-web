@@ -5,12 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { Dictionary } from "@/dictionaries/fr";
 import type { Locale } from "@/lib/i18n";
+import Image from "next/image";
 import Logo from "@/components/Logo";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { BellIcon, CalendarIcon, CarIcon, ChevronsLeftIcon, CoinsIcon, GridIcon, LogoutIcon, MoonIcon, ShieldIcon, SunIcon, UserIcon } from "@/components/Icons";
+import { BellIcon, CalendarIcon, CarIcon, ChevronDownIcon, CoinsIcon, GlobeIcon, GridIcon, LogoutIcon, MoonIcon, ShieldIcon, SunIcon, UserIcon } from "@/components/Icons";
 import { useAuth } from "./AuthProvider";
 import { DashProvider } from "./DashContext";
-import { Loading } from "./dash-ui";
+import { Initial, Loading } from "./dash-ui";
 import { useNotices } from "./notifications";
 import { GhostButton, PrimaryButton } from "./ui";
 
@@ -33,11 +34,13 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
   const pathname = usePathname() ?? "";
   const base = `/${lang}/dashboard`;
   const [confirming, setConfirming] = useState(false);
+  const [account, setAccount] = useState(false);
   const [theme, setTheme] = useStored<Theme>("voom-dash-theme", "dark");
-  const [menu, setMenu] = useStored<"open" | "shrunk">("voom-dash-menu", "open", () => (window.innerWidth < 1280 ? "shrunk" : "open"));
+  const [hover, setHover] = useState(false);
+  // The dashboard is kept alive while you visit the public site: no pointer-leave ever arrives, so start closed on the way back
+  useEffect(() => () => setHover(false), []);
   const notices = useNotices(user?.id);
   const light = theme === "light";
-  const shrunk = menu === "shrunk";
   const c = dict.dash.common;
 
   useEffect(() => {
@@ -53,8 +56,11 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
 
   if (!ready || !user) return <div className="night min-h-screen"><Loading /></div>;
 
-  const leave = async () => { setConfirming(false); await signOut(); router.replace(`/${lang}/login`); };
+  const leave = async () => { setConfirming(false); setHover(false); setAccount(false); await signOut(); router.replace(`/${lang}/login`); };
   const shell = `${light ? "dash-light" : ""} min-h-screen bg-page text-fg`;
+  // The sidebar is a slim icon rail that opens by itself when the pointer is on it (or a key focus is in it), and stays open while the account menu is
+  const shrunk = !(hover || account);
+  const soften = `${confirming ? "pointer-events-none select-none blur-[7px] brightness-75" : ""}`;
 
   // A rejected agency is stopped; a pending one can already work (its cars stay hidden)
   if (role === "agency" && agency?.approval_status === "rejected") {
@@ -74,7 +80,6 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
     ? [
         { href: base, label: dict.dash.me.title, icon: CalendarIcon, exact: true },
         { href: `${base}/notifications`, label: dict.dash.nav.notifications, icon: BellIcon },
-        { href: `${base}/profile`, label: dict.dash.nav.profile, icon: UserIcon },
       ]
     : role === "admin"
     ? [
@@ -87,18 +92,16 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
         { href: `${base}/bookings`, label: dict.dash.nav.bookings, icon: CalendarIcon },
         { href: `${base}/fleet`, label: dict.dash.nav.fleet, icon: CarIcon },
         { href: `${base}/earnings`, label: dict.dash.nav.earnings, icon: CoinsIcon },
-        { href: `${base}/profile`, label: dict.dash.nav.profile, icon: UserIcon },
+        { href: `${base}/notifications`, label: dict.dash.nav.notifications, icon: BellIcon },
       ];
   // The phone bar has room for five: the inbox lives in the bell there
+  const phoneNav = nav.filter((item) => !item.href.endsWith("/notifications"));
   const isActive = (item: NavItem) => (item.exact ? pathname === item.href : pathname.startsWith(item.href));
   const accountName = role === "admin" ? c.adminName : role === "customer" ? renter?.name ?? user.email : agency?.name;
   const logoTone = light ? "black" : "white";
 
-  const themeButton = (
-    <button type="button" onClick={() => setTheme(light ? "dark" : "light")} aria-label={light ? c.themeDark : c.themeLight} title={light ? c.themeDark : c.themeLight} className="flex h-10 w-10 items-center justify-center rounded-full bg-fg/10 transition-colors hover:bg-fg/20">
-      {light ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
-    </button>
-  );
+  const photo = role === "agency" ? agency?.logo_url : renter?.avatar_url;
+  const avatar = <Initial name={accountName} src={photo} className="h-10 w-10 text-lg" />;
   const bell = (
     <Link href={`${base}/notifications`} aria-label={dict.dash.nav.notifications} title={dict.dash.nav.notifications} className="relative flex h-10 w-10 items-center justify-center rounded-full bg-fg/10 transition-colors hover:bg-fg/20">
       <BellIcon className="h-5 w-5" />
@@ -106,90 +109,151 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
     </Link>
   );
 
+  // The account menu: who you are, your profile, language, appearance, sign out. Opens from the sidebar button (desktop) or the avatar (phone).
+  const roleLabel = role === "admin" ? c.roleAdmin : role === "agency" ? c.roleAgency : c.roleCustomer;
+  const row = "flex min-h-[3.25rem] items-center gap-3 rounded-2xl px-2 py-1.5";
+  const rowIcon = "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-fg/10 text-fg/70";
+  const accountPanel = (
+    <div className="space-y-1">
+      <div className="mb-2 flex items-center gap-3 rounded-2xl bg-fg/5 p-3">
+        <Initial name={accountName} src={photo} className="h-12 w-12 text-xl" />
+        <div className="min-w-0">
+          <p className="truncate font-bold">{accountName}</p>
+          <p className="truncate text-xs text-fg/55">{user.email}</p>
+          <span className="mt-1.5 inline-block rounded-full bg-volt/20 px-2.5 py-0.5 text-[11px] font-bold text-volt-soft">{roleLabel}</span>
+        </div>
+      </div>
+      {role !== "admin" ? (
+        <Link href={`${base}/profile`} onClick={() => setAccount(false)} className={`${row} transition-colors hover:bg-fg/10`}>
+          <span className={rowIcon}><UserIcon className="h-[18px] w-[18px]" /></span>
+          <span className="flex-1 font-semibold">{c.myProfile}</span>
+          <span aria-hidden className="text-fg/35 rtl:rotate-180">→</span>
+        </Link>
+      ) : null}
+      <div className={row}>
+        <span className={rowIcon}><GlobeIcon className="h-[18px] w-[18px]" /></span>
+        <span className="flex-1 font-semibold">{dict.nav.language}</span>
+        <LanguageSwitcher current={lang} label={dict.nav.language} compact />
+      </div>
+      <div className={row}>
+        <span className={rowIcon}>{light ? <SunIcon className="h-[18px] w-[18px]" /> : <MoonIcon className="h-[18px] w-[18px]" />}</span>
+        <span className="flex-1 font-semibold">{c.appearance}</span>
+        <div role="radiogroup" aria-label={c.appearance} className="flex items-center rounded-full bg-fg/10 p-1">
+          {([["light", c.themeLight, SunIcon], ["dark", c.themeDark, MoonIcon]] as const).map(([mode, label, Icon]) => (
+            <button key={mode} type="button" role="radio" aria-checked={(mode === "light") === light} title={label} aria-label={label} onClick={() => setTheme(mode)} className={`flex h-8 w-9 items-center justify-center rounded-full transition-colors ${(mode === "light") === light ? "bg-fg text-page" : "text-fg/60 hover:text-fg"}`}>
+              <Icon className="h-4 w-4" />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="my-1 h-px bg-fg/10" />
+      <button type="button" onClick={() => { setAccount(false); setConfirming(true); }} className={`${row} w-full text-start font-semibold text-danger transition-colors hover:bg-danger/10`}>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-danger/15"><LogoutIcon className="h-[18px] w-[18px]" /></span>
+        {c.signOut}
+      </button>
+    </div>
+  );
+
   return (
     <DashProvider lang={lang} dict={dict} notices={notices}>
       <div className={`${shell} lg:flex`}>
-        {/* Desktop sidebar: can shrink to icons */}
-        <aside className={`night sticky top-0 hidden h-screen shrink-0 flex-col justify-between overflow-y-auto overflow-x-hidden border-e border-fg/10 p-4 transition-[width] duration-300 ease-out lg:flex ${shrunk ? "w-[5.5rem]" : "w-[17rem]"}`}>
-          <div>
-            <Link href={`/${lang}`} aria-label="Voom" className={`mb-8 mt-2 flex h-10 items-center ${shrunk ? "justify-center" : "px-2"}`}>
-              {shrunk ? <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-volt font-display text-2xl font-extrabold text-white">v</span> : <Logo tone={logoTone} height={28} />}
-            </Link>
-            <nav className="space-y-1.5">
-              {nav.map((item) => (
-                <Link key={item.href} href={item.href} title={item.label} aria-label={item.label} className={`flex h-12 items-center gap-3 rounded-2xl font-semibold transition-colors ${shrunk ? "justify-center" : "px-4"} ${isActive(item) ? "bg-volt text-white shadow-lg shadow-volt/30" : "text-fg/65 hover:bg-fg/10 hover:text-fg"}`}>
-                  {item.icon({ className: "h-5 w-5 shrink-0" })}
-                  {shrunk ? null : <span className="truncate">{item.label}</span>}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div className="space-y-3">
-            <button type="button" onClick={() => setMenu(shrunk ? "open" : "shrunk")} title={shrunk ? c.expand : c.collapse} aria-label={shrunk ? c.expand : c.collapse} className={`flex h-11 w-full items-center gap-3 rounded-2xl text-sm font-semibold text-fg/55 transition-colors hover:bg-fg/10 hover:text-fg ${shrunk ? "justify-center" : "px-4"}`}>
-              <ChevronsLeftIcon className={`h-5 w-5 shrink-0 transition-transform duration-300 ${shrunk ? "rotate-180 rtl:rotate-0" : "rtl:rotate-180"}`} />
-              {shrunk ? null : <span>{c.collapse}</span>}
+        {/* Desktop sidebar: a slim rail of icons that opens over the page while the pointer is on it */}
+        <div
+          className={`${soften} sticky top-0 z-30 hidden h-screen w-[5.5rem] shrink-0 transition-[filter] duration-200 lg:block`}
+          style={{ "--side": shrunk ? "5.5rem" : "17rem" } as React.CSSProperties}
+          onMouseEnter={() => setHover(true)}
+          onMouseMove={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          onFocus={(e) => { if (e.target.matches(":focus-visible")) setHover(true); }}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHover(false); }}
+        >
+          <aside className={`night absolute inset-y-0 start-0 flex w-[var(--side)] flex-col justify-between overflow-y-auto overflow-x-hidden border-e border-fg/10 p-4 transition-[width,box-shadow] duration-200 ease-out ${shrunk ? "" : "shadow-2xl shadow-black/30"}`}>
+            <div>
+              <Link href={`/${lang}`} aria-label="Voom" onClick={() => setHover(false)} className={`mb-8 mt-2 flex h-10 items-center ${shrunk ? "justify-center" : "px-2"}`}>
+                {shrunk ? <Image src={`/voom-mark-${logoTone}.svg`} alt="Voom" width={52} height={24} unoptimized className="h-6 w-auto" /> : <Logo tone={logoTone} height={28} />}
+              </Link>
+              <nav className="space-y-1.5">
+                {nav.map((item) => (
+                  <Link key={item.href} href={item.href} title={item.label} aria-label={item.label} className={`flex h-12 items-center gap-3 rounded-2xl font-semibold transition-colors ${shrunk ? "justify-center" : "px-4"} ${isActive(item) ? "bg-volt text-white shadow-lg shadow-volt/30" : "text-fg/65 hover:bg-fg/10 hover:text-fg"}`}>
+                    <span className="relative flex shrink-0">
+                      {item.icon({ className: "h-5 w-5" })}
+                      {shrunk && item.href.endsWith("/notifications") && notices.unread > 0 ? <span className={`absolute -end-1 -top-1 h-2.5 w-2.5 rounded-full bg-danger ring-2 ${isActive(item) ? "ring-volt" : "ring-night"}`} /> : null}
+                    </span>
+                    {shrunk ? null : <span className="min-w-0 flex-1 truncate">{item.label}</span>}
+                    {!shrunk && item.href.endsWith("/notifications") && notices.unread > 0 ? <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${isActive(item) ? "bg-white/25 text-white" : "bg-volt text-white"}`}>{notices.unread > 9 ? "9+" : notices.unread}</span> : null}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* The account: one calm button, everything else opens from it */}
+            <button type="button" onClick={() => setAccount((o) => !o)} aria-expanded={account} title={accountName ?? undefined} className={`flex w-full items-center gap-3 rounded-2xl border border-fg/10 p-2 transition-colors hover:bg-fg/10 ${shrunk ? "justify-center" : ""} ${account ? "bg-fg/10" : ""}`}>
+              {avatar}
+              {shrunk ? null : (
+                <>
+                  <span className="min-w-0 flex-1 text-start">
+                    <span className="block truncate font-bold">{accountName}</span>
+                    <span className="block truncate text-xs text-fg/50">{user.email}</span>
+                  </span>
+                  <ChevronDownIcon className={`h-4 w-4 shrink-0 text-fg/50 transition-transform ${account ? "" : "rotate-180"}`} />
+                </>
+              )}
             </button>
-            {shrunk ? null : (
-              <div className="glass rounded-2xl p-4">
-                <p className="truncate font-bold">{accountName}</p>
-                <p className="truncate text-xs text-fg/50">{user.email}</p>
-              </div>
-            )}
-          </div>
-        </aside>
+          </aside>
+
+          {account ? (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => { setAccount(false); setHover(false); }} />
+              <div className="menu-in glass absolute bottom-4 start-[calc(var(--side)+0.75rem)] z-50 w-80 rounded-3xl bg-night! p-3 shadow-2xl shadow-black/40">{accountPanel}</div>
+            </>
+          ) : null}
+        </div>
 
         <div className="min-w-0 flex-1">
-          {/* Mobile top bar */}
-          <header className="topbar sticky top-0 z-30 flex items-center justify-between gap-2 !rounded-none !border-x-0 !border-t-0 px-3 py-3 lg:hidden">
+          {/* Phone top bar: the mark, the inbox, and one account button that holds the rest */}
+          <header className={`${soften} transition-[filter] duration-200 topbar sticky top-0 z-30 flex items-center justify-between gap-2 !rounded-none !border-x-0 !border-t-0 px-4 py-3 lg:hidden`}>
             <Link href={`/${lang}`} aria-label="Voom" className="shrink-0">
               <span className="hidden min-[420px]:block"><Logo tone={logoTone} height={24} /></span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-volt font-display text-2xl font-extrabold text-white min-[420px]:hidden">v</span>
+              <Image src={`/voom-mark-${logoTone}.svg`} alt="Voom" width={52} height={24} unoptimized className="h-6 w-auto min-[420px]:hidden" />
             </Link>
-            <div className="flex items-center gap-1.5">
-              <LanguageSwitcher current={lang} label={dict.nav.language} compact />
+            <div className="flex items-center gap-2">
               {bell}
-              {themeButton}
-              <button type="button" onClick={() => setConfirming(true)} aria-label={c.signOut} className="flex h-10 w-10 items-center justify-center rounded-full bg-fg/10 transition-colors hover:bg-fg/20"><LogoutIcon className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setAccount((o) => !o)} aria-label={accountName ?? c.adminName} aria-expanded={account} className="rounded-full ring-2 ring-transparent transition-shadow aria-expanded:ring-volt">{avatar}</button>
             </div>
           </header>
+          {account ? (
+            <>
+              <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setAccount(false)} />
+              <div className="menu-in glass fixed end-3 top-[4.25rem] z-50 w-80 rounded-3xl bg-night! p-3 shadow-2xl shadow-black/40 lg:hidden">{accountPanel}</div>
+            </>
+          ) : null}
 
-          {/* Desktop top bar: language, theme, inbox, who is signed in, and the way out */}
-          <div className="topbar sticky top-0 z-30 hidden items-center justify-end gap-3 !border-x-0 !border-t-0 px-8 py-4 lg:flex">
-            <LanguageSwitcher current={lang} label={dict.nav.language} />
-            {themeButton}
-            {bell}
-            <span className="ms-2 flex items-center gap-3 text-sm text-fg/70">
-              <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-full bg-volt/25 font-display font-extrabold text-volt-soft">{(accountName ?? "?").charAt(0).toUpperCase()}</span>
-              <span className="max-w-56 truncate">{user.email}</span>
-            </span>
-            <button type="button" onClick={() => setConfirming(true)} className="flex items-center gap-2 rounded-full border border-fg/15 px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-fg/10">
-              <LogoutIcon className="h-4 w-4" /> {c.signOut}
-            </button>
-          </div>
-
-          <main className="mx-auto max-w-6xl px-4 pb-32 pt-8 sm:px-8 lg:pb-16 lg:pt-4">{children}</main>
+          <main className={`${soften} transition-[filter] duration-200 mx-auto max-w-6xl px-4 pb-32 pt-10 sm:px-8 lg:pb-16 lg:pt-14`}>{children}</main>
 
           {/* Mobile bottom navigation */}
-          <nav aria-label={dict.dash.nav.menu} className="topbar fixed inset-x-3 bottom-3 z-40 flex justify-around rounded-full p-1.5 shadow-xl shadow-black/20 lg:hidden">
-            {nav.filter((item) => nav.length < 4 || !item.href.endsWith("/notifications")).map((item) => (
+          {phoneNav.length > 1 ? <nav aria-label={dict.dash.nav.menu} className={`${soften} transition-[filter] duration-200 topbar fixed inset-x-3 bottom-3 z-40 flex justify-around rounded-full p-1.5 shadow-xl shadow-black/20 lg:hidden`}>
+            {phoneNav.map((item) => (
               <Link key={item.href} href={item.href} className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full py-2 text-[11px] font-semibold ${isActive(item) ? "bg-volt text-white" : "text-fg/60"}`}>
                 {item.icon({ className: "h-5 w-5" })}
-                <span className="max-w-full truncate px-1">{item.label}</span>
+                <span className="max-w-full px-0.5 text-center leading-[1.1]">{item.label}</span>
               </Link>
             ))}
-          </nav>
+          </nav> : null}
         </div>
       </div>
 
       {confirming ? (
-        <div role="dialog" aria-modal="true" aria-labelledby="signout-title" className={`${light ? "dash-light" : ""} fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5 backdrop-blur-sm`} onClick={() => setConfirming(false)}>
-          <div className="night w-full max-w-sm rounded-[2rem] border border-fg/10 p-8 text-center text-fg shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-volt/20 text-volt-soft"><LogoutIcon className="h-6 w-6" /></span>
-            <h2 id="signout-title" className="font-display mt-5 text-2xl font-extrabold">{c.signOutTitle}</h2>
-            <p className="mt-2 text-fg/60">{c.signOutText}</p>
-            <div className="mt-7 flex flex-col gap-3">
-              <PrimaryButton type="button" onClick={leave}>{c.signOut}</PrimaryButton>
-              <GhostButton type="button" onClick={() => setConfirming(false)} className="w-full">{c.cancel}</GhostButton>
+        <div role="dialog" aria-modal="true" aria-labelledby="signout-title" className="scrim menu-in fixed inset-0 z-[60] flex items-center justify-center px-5" onClick={() => setConfirming(false)}>
+          {/* The theme variables live on this wrapper, which must stay see-through so the blurred page shows behind the card */}
+          <div className={`${light ? "dash-light" : ""} w-full max-w-sm`}>
+            <div className="night rounded-[2rem] border border-fg/10 p-8 text-center text-fg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-volt/20 text-volt-soft"><LogoutIcon className="h-6 w-6" /></span>
+              <h2 id="signout-title" className="font-display mt-5 text-2xl font-extrabold">{c.signOutTitle}</h2>
+              <p className="mt-2 text-fg/60">{c.signOutText}</p>
+              <div className="mt-7 flex flex-col gap-3">
+                <PrimaryButton type="button" onClick={leave}>{c.signOut}</PrimaryButton>
+                <GhostButton type="button" onClick={() => setConfirming(false)} className="w-full">{c.cancel}</GhostButton>
+              </div>
             </div>
           </div>
         </div>

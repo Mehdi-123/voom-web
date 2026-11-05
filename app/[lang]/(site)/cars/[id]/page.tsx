@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LOCALES, fill, formatPrice, getDictionary, hasLocale } from "@/lib/i18n";
@@ -9,6 +8,8 @@ import { alternatesFor } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 import StoreBadges from "@/components/StoreBadges";
 import JsonLd from "@/components/JsonLd";
+import CarGallery from "@/components/CarGallery";
+import BookingPanel from "@/components/BookingPanel";
 import Reveal from "@/components/Reveal";
 
 type Props = { params: Promise<{ lang: string; id: string }> };
@@ -83,40 +84,30 @@ export default async function CarPage({ params }: Props) {
         }}
       />
 
-      <div className="mx-auto max-w-6xl px-5 pb-24 pt-32 sm:pt-40">
+      {/* A dark band holds the floating header; the page itself is a white sheet */}
+      <div className="bg-night">
+      <div className="mt-24 rounded-t-[2.5rem] bg-white text-ink sm:mt-28">
+      <div className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:pt-12">
         {citySlug ? (
-          <Link href={`/${lang}/cities/${citySlug}`} className="glass inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors hover:bg-white/15">
+          <Link href={`/${lang}/cities/${citySlug}`} className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-5 py-2 text-sm font-semibold transition-colors hover:bg-line/60">
             <span className="rtl:rotate-180">←</span> {fill(dict.car.back, { city: cityName })}
           </Link>
         ) : null}
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <div className="min-w-0">
-            <Reveal variant="none">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[2.5rem] bg-white/5 shadow-2xl shadow-volt/20">
-                {images[0] ? (
-                  <Image src={images[0]} alt={name} fill priority sizes="(min-width: 1024px) 60vw, 100vw" className="object-cover" />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-white/50">{dict.car.noPhoto}</div>
-                )}
-              </div>
-            </Reveal>
-            {images.length > 1 ? (
-              <div className="no-scrollbar mt-3 flex snap-x gap-3 overflow-x-auto">
-                {images.slice(1).map((src, i) => (
-                  <div key={src} className="relative aspect-[4/3] w-40 shrink-0 snap-start overflow-hidden rounded-2xl bg-white/5 sm:w-52">
-                    <Image src={src} alt={`${name} ${i + 2}`} fill sizes="208px" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
+          <Reveal variant="none" className="min-w-0">
+            <CarGallery
+              images={images}
+              name={name}
+              labels={{ prev: dict.car.photoPrev, next: dict.car.photoNext, close: dict.car.photoClose, open: dict.car.photoOpen, count: dict.car.photoCount, noPhoto: dict.car.noPhoto }}
+            />
+          </Reveal>
 
           <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
             <div>
               <h1 className="font-display text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl">{name}</h1>
-              <p className="mt-3 text-lg text-white/60">{cityName}</p>
-              {hasReviews ? <p className="mt-2 text-sm font-semibold text-volt-soft">★ {fill(dict.car.rating, { rating: car.rating!.toFixed(1), count: car.review_count! })}</p> : null}
+              <p className="mt-3 text-lg text-muted">{cityName}</p>
+              {hasReviews ? <p className="mt-2 text-sm font-semibold text-volt-mid">★ {fill(dict.car.rating, { rating: car.rating!.toFixed(1), count: car.review_count! })}</p> : null}
             </div>
 
             <div className="rounded-[2rem] bg-gradient-to-br from-volt-deep to-volt-mid p-7">
@@ -127,10 +118,12 @@ export default async function CarPage({ params }: Props) {
               </p>
             </div>
 
+            <BookingPanel carId={car.id} pricePerDay={car.price_per_day} lang={lang} labels={dict.book} />
+
             <dl className="grid grid-cols-2 gap-3">
               {specs.map((s) => (
-                <div key={s.label} className="glass rounded-2xl p-4">
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-white/50">{s.label}</dt>
+                <div key={s.label} className="rounded-2xl border border-line bg-paper p-4">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-muted">{s.label}</dt>
                   <dd className="mt-1 font-bold">{s.value}</dd>
                 </div>
               ))}
@@ -143,13 +136,13 @@ export default async function CarPage({ params }: Props) {
             <h2 className="font-display mb-5 text-3xl font-extrabold">{dict.car.features}</h2>
             <ul className="flex flex-wrap gap-2">
               {car.features.map((f) => (
-                <li key={f} className="glass rounded-full px-5 py-2.5 text-sm font-semibold">{labels.options[f] ?? f}</li>
+                <li key={f} className="rounded-full border border-line bg-paper px-5 py-2.5 text-sm font-semibold">{labels.options[f] ?? f}</li>
               ))}
             </ul>
           </section>
         ) : null}
 
-        <section className="night relative mt-20 overflow-hidden rounded-[2.5rem] p-8 sm:p-14">
+        <section className="night relative mt-20 text-white overflow-hidden rounded-[2.5rem] p-8 sm:p-14">
           <h2 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">{dict.car.howTitle}</h2>
           <p className="mt-4 max-w-2xl text-lg text-white/65">{dict.car.bookText}</p>
           <ol className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -162,6 +155,8 @@ export default async function CarPage({ params }: Props) {
           </ol>
           <div className="mt-10"><StoreBadges dict={dict} /></div>
         </section>
+      </div>
+      </div>
       </div>
     </>
   );

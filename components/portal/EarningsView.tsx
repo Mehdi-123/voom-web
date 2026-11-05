@@ -49,7 +49,7 @@ export default function EarningsView() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="on-volt relative isolate overflow-hidden rounded-[2rem] bg-gradient-to-br from-volt-deep to-volt-mid p-8 shadow-2xl shadow-volt/20 lg:col-span-2">
-          <span aria-hidden className="absolute -end-16 -top-16 -z-10 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+          <span aria-hidden className="glow-blob absolute -end-20 -top-20 -z-10 h-80 w-80" />
           <p className="text-xs font-bold uppercase tracking-wider text-white/70">{t.allTime}</p>
           <p className="font-display mt-3 text-4xl font-extrabold leading-none tracking-tight [overflow-wrap:anywhere] sm:text-6xl xl:text-7xl">{formatPrice(total, lang)}</p>
           <p className="mt-4 text-sm text-white/70">{t.trips}: {rows.length}</p>

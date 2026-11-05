@@ -10,7 +10,7 @@ import { authErrorMessage } from "@/lib/auth-errors";
 import { MOROCCAN_CITIES } from "@/lib/moroccan-cities";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { formatPhone, isValidPhone } from "@/lib/phone";
-import { ErrorNote, Field, GhostButton, PrimaryButton, SelectInput, TextInput } from "./ui";
+import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, SelectInput, TextInput } from "./ui";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 import Turnstile from "./Turnstile";
 import { turnstileEnabled } from "@/lib/turnstile";
@@ -231,13 +231,10 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
           </Field>
           <Field label={t.confirmPassword} error={errors.confirm ?? mismatch}><TextInput type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} invalid={!!(errors.confirm ?? mismatch)} autoComplete="new-password" /></Field>
           <div>
-            <label className="flex cursor-pointer items-start gap-3">
-              <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#a259ff]" />
-              <span className="text-sm text-fg/80">
-                {t.accept}{" "}
-                <Link href={`/${lang}/terms`} target="_blank" className="font-semibold text-volt-soft underline">↗</Link>
-              </span>
-            </label>
+            <Checkbox checked={accepted} onChange={setAccepted} invalid={!!errors.accepted}>
+              {t.accept}{" "}
+              <Link href={`/${lang}/terms`} target="_blank" className="font-semibold text-volt-soft underline">↗</Link>
+            </Checkbox>
             {errors.accepted ? <span className="mt-1.5 block text-sm text-danger">{errors.accepted}</span> : null}
           </div>
         </>

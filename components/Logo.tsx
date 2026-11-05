@@ -10,6 +10,8 @@ export default function Logo({ tone = "black", height = 28 }: { tone?: "white" |
       height={height}
       priority
       unoptimized
+      draggable={false}
+      className="pointer-events-none select-none"
     />
   );
 }

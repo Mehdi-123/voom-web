@@ -32,7 +32,7 @@ export default async function AgenciesPage({ params }: Props) {
           </Reveal>
           <Reveal delay={450}><p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/65 sm:text-xl">{a.intro}</p></Reveal>
           <Reveal delay={600} className="mt-10 flex flex-wrap gap-3">
-            <Link href={`/${lang}/signup`} className="rounded-full bg-volt px-8 py-4 text-lg font-bold text-white shadow-lg shadow-volt/40 transition-all hover:bg-volt-soft">{a.cta} →</Link>
+            <Link href={`/${lang}/signup/agency`} className="rounded-full bg-volt px-8 py-4 text-lg font-bold text-white shadow-lg shadow-volt/40 transition-all hover:bg-volt-soft">{a.cta} →</Link>
             <Link href={`/${lang}/login`} className="glass rounded-full px-8 py-4 text-lg font-semibold transition-colors hover:bg-white/15">{dict.dash.auth.login}</Link>
           </Reveal>
         </div>
@@ -77,7 +77,7 @@ export default async function AgenciesPage({ params }: Props) {
           <h2 className="font-display mx-auto max-w-3xl text-5xl font-extrabold tracking-tight sm:text-7xl">{dict.download.title}</h2>
           <p className="mx-auto mt-5 max-w-xl text-lg text-white/80">{dict.download.text}</p>
           <div className="mt-10 flex flex-col items-center gap-6">
-            <Link href={`/${lang}/signup`} className="rounded-full bg-white px-8 py-4 text-lg font-bold text-ink transition-transform hover:scale-105">{a.cta} →</Link>
+            <Link href={`/${lang}/signup/agency`} className="rounded-full bg-white px-8 py-4 text-lg font-bold text-ink transition-transform hover:scale-105">{a.cta} →</Link>
             <StoreBadges dict={dict} />
           </div>
         </Reveal>

@@ -110,7 +110,7 @@ export default function AdminOverview() {
       <div className="grid gap-4 lg:grid-cols-3">
         {/* The number that matters, with the two queues underneath */}
         <div className="on-volt relative isolate flex flex-col justify-between gap-8 overflow-hidden rounded-[2rem] bg-gradient-to-br from-volt-mid to-volt p-8 shadow-2xl shadow-volt/25 lg:col-span-2">
-          <span aria-hidden className="absolute -end-16 -top-16 -z-10 h-64 w-64 rounded-full bg-fg/10 blur-2xl" />
+          <span aria-hidden className="glow-blob absolute -end-20 -top-20 -z-10 h-80 w-80" />
           <div className="flex items-center justify-between gap-6">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-fg/75">{t.waitingForReview}</p>

@@ -3,6 +3,9 @@ const base = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strok
 export const ShieldIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
 );
+export const CameraIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>
+);
 export const CashIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="3" /><path d="M6 12h.01M18 12h.01" /></svg>
 );
@@ -62,4 +65,32 @@ export const CheckIcon = ({ className = "" }: { className?: string }) => (
 );
 export const ChevronDownIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M6 9l6 6 6-6" /></svg>
+);
+
+export const ChevronLeftIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M15 18l-6-6 6-6" /></svg>
+);
+export const ChevronRightIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M9 18l6-6-6-6" /></svg>
+);
+export const CloseIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
+);
+export const ExpandIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2} className={className} aria-hidden><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+);
+
+export const PanelIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16" /></svg>
+);
+
+export const ImageIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><rect x="3" y="4" width="18" height="16" rx="3" /><circle cx="9" cy="10" r="1.8" /><path d="M21 16l-5-5-8 9" /></svg>
+);
+export const MinusIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} strokeWidth={2.2} className={className} aria-hidden><path d="M5 12h14" /></svg>
+);
+
+export const GlobeIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></svg>
 );

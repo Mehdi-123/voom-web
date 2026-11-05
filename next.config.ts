@@ -6,6 +6,8 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.
 // NEXT_DIST_DIR lets a test build or a second server use its own folder, so it never overwrites the dev server's .next
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
+  // The development badge sits bottom-right so it never covers the dashboard menu
+  devIndicators: { position: "bottom-right" },
   cacheComponents: true,
   partialPrefetching: true,
   images: {

@@ -17,6 +17,7 @@ export default function Footer({ lang, dict }: { lang: Locale; dict: Dictionary 
             {CITIES.slice(0, 6).map((c) => (
               <li key={c.slug}><Link href={`/${lang}/cities/${c.slug}`} className="hover:text-white">{c.names[lang]}</Link></li>
             ))}
+            <li><Link href={`/${lang}/cars`} className="hover:text-white">{dict.nav.cars}</Link></li>
             <li><Link href={`/${lang}/agencies`} className="hover:text-white">{dict.nav.agencies}</Link></li>
           </ul>
         </div>
