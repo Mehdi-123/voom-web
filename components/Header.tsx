@@ -16,7 +16,7 @@ export default function Header({ lang, dict }: { lang: Locale; dict: Dictionary 
 
   return (
     <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-5 sm:px-5">
-      <div className="glass mx-auto flex max-w-5xl bg-night/80!  items-center justify-between gap-3 rounded-full py-2.5 ps-5 pe-2.5 sm:ps-6 text-white shadow-2xl shadow-black/30">
+      <div className="topbar mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-full py-2.5 ps-5 pe-2.5 text-white shadow-2xl shadow-black/30 sm:ps-6">
         <Link href={`/${lang}`} aria-label="Voom" className="shrink-0">
           <Logo tone="white" height={24} />
         </Link>

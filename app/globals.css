@@ -103,6 +103,14 @@ html[dir="rtl"] .sweep { background: linear-gradient(270deg, transparent, var(--
 .text-gradient { background: linear-gradient(100deg, #fff 10%, var(--color-volt-soft) 55%, var(--color-volt) 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .outline-text { -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.35); color: transparent; }
 
+/* Frosted bars: see-through enough that what scrolls underneath is visibly blurred */
+.topbar { background: rgba(15, 13, 28, 0.58); border: 1px solid rgba(255, 255, 255, 0.16); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6); }
+.dash-light .topbar { background: rgba(255, 255, 255, 0.6); border-color: rgba(20, 18, 31, 0.1); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .topbar { background: rgba(15, 13, 28, 0.94); }
+  .dash-light .topbar { background: rgba(255, 255, 255, 0.96); }
+}
+
 /* ── Motion ─────────────────────────────────────────────────────────── */
 @keyframes float { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(var(--float, -14px)) rotate(var(--r, 0deg)); } }
 .float { animation: float 6s ease-in-out infinite; }

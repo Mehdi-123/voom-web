@@ -140,7 +140,7 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
 
         <div className="min-w-0 flex-1">
           {/* Mobile top bar */}
-          <header className="night sticky top-0 z-30 flex items-center justify-between gap-2 px-3 py-3 lg:hidden">
+          <header className="topbar sticky top-0 z-30 flex items-center justify-between gap-2 !rounded-none !border-x-0 !border-t-0 px-3 py-3 lg:hidden">
             <Link href={`/${lang}`} aria-label="Voom" className="shrink-0">
               <span className="hidden min-[420px]:block"><Logo tone={logoTone} height={24} /></span>
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-volt font-display text-2xl font-extrabold text-white min-[420px]:hidden">v</span>
@@ -154,7 +154,7 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
           </header>
 
           {/* Desktop top bar: language, theme, inbox, who is signed in, and the way out */}
-          <div className="sticky top-0 z-30 hidden items-center justify-end gap-3 bg-page/80 px-8 py-4 backdrop-blur lg:flex">
+          <div className="topbar sticky top-0 z-30 hidden items-center justify-end gap-3 !border-x-0 !border-t-0 px-8 py-4 lg:flex">
             <LanguageSwitcher current={lang} label={dict.nav.language} />
             {themeButton}
             {bell}
@@ -170,7 +170,7 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
           <main className="mx-auto max-w-6xl px-4 pb-32 pt-8 sm:px-8 lg:pb-16 lg:pt-4">{children}</main>
 
           {/* Mobile bottom navigation */}
-          <nav aria-label={dict.dash.nav.menu} className="glass fixed inset-x-3 bottom-3 z-40 flex justify-around rounded-full bg-night/90! p-1.5 lg:hidden">
+          <nav aria-label={dict.dash.nav.menu} className="topbar fixed inset-x-3 bottom-3 z-40 flex justify-around rounded-full p-1.5 shadow-xl shadow-black/20 lg:hidden">
             {nav.filter((item) => nav.length < 4 || !item.href.endsWith("/notifications")).map((item) => (
               <Link key={item.href} href={item.href} className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full py-2 text-[11px] font-semibold ${isActive(item) ? "bg-volt text-white" : "text-fg/60"}`}>
                 {item.icon({ className: "h-5 w-5" })}
