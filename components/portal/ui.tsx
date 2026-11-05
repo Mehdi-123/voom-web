@@ -1,6 +1,7 @@
 import { ReactNode, InputHTMLAttributes, ButtonHTMLAttributes, SelectHTMLAttributes, forwardRef } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import BackLink from "@/components/BackLink";
 import type { Locale } from "@/lib/i18n";
 
 /** Centered card on the night background, for sign in, sign up and password reset. */
@@ -10,11 +11,13 @@ export function AuthShell({ lang, children, wide = false, back, backHref }: { la
       {/* One row: the way back on the far left, the logo in the middle */}
       <div className="mb-10 grid w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center sm:mb-14">
         <div>
-          {back ? (
-            <Link href={backHref ?? `/${lang}`} aria-label={back} className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:px-5">
-              <span aria-hidden className="rtl:rotate-180">←</span><span className="hidden sm:inline">{back}</span>
-            </Link>
-          ) : null}
+          {back ? (() => {
+            const style = "inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:px-5";
+            const content = <><span aria-hidden className="rtl:rotate-180">←</span><span className="hidden sm:inline">{back}</span></>;
+            return backHref
+              ? <Link href={backHref} aria-label={back} className={style}>{content}</Link>
+              : <BackLink href={`/${lang}`} label={back} className={style}>{content}</BackLink>;
+          })() : null}
         </div>
         <Link href={`/${lang}`} aria-label="Voom"><Logo tone="white" height={44} /></Link>
         <span />

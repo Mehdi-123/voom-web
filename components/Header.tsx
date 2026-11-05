@@ -7,7 +7,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import MobileMenu from "./MobileMenu";
 import AccountLink from "./AccountLink";
 
-/** A glass pill floating over the page: logo, links, language. */
+/** A glass pill floating over the page: logo, links, language. Pages with a light top use LightHeader, and the pill turns light (globals.css). */
 export default function Header({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const links = [
     { href: `/${lang}/cars`, label: dict.nav.cars },
@@ -19,9 +19,10 @@ export default function Header({ lang, dict }: { lang: Locale; dict: Dictionary 
     <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-5 sm:px-5">
       <div className="topbar mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-full py-2.5 ps-5 pe-2.5 text-white shadow-2xl shadow-black/30 sm:ps-6">
         <Link href={`/${lang}`} aria-label="Voom" className="shrink-0">
-          <Logo tone="white" height={24} />
+          <span className="logo-on-dark"><Logo tone="white" height={24} /></span>
+          <span className="logo-on-light"><Logo tone="black" height={24} /></span>
         </Link>
-        <nav aria-label={dict.nav.menu} className="hidden items-center gap-8 text-sm font-medium text-white/80 md:flex">
+        <nav aria-label={dict.nav.menu} className="header-links hidden items-center gap-8 text-sm font-medium text-white/80 md:flex">
           {links.map((l) => (
             <Link key={l.href} href={l.href} className="transition-colors hover:text-white">{l.label}</Link>
           ))}

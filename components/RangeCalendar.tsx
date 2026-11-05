@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/i18n";
 import { fill } from "@/lib/i18n";
 import { ChevronLeftIcon, ChevronRightIcon } from "./Icons";
@@ -20,6 +20,17 @@ export default function RangeCalendar({ from, to, min, lang, labels, blocked, de
   const [open, setOpen] = useState(defaultOpen);
   const [view, setView] = useState(() => { const d = from ? parse(from) : parse(min); d.setDate(1); return d; });
   const locale = LOCALE[lang];
+  const box = useRef<HTMLDivElement>(null);
+
+  // A click or tap anywhere else, or Escape, closes the calendar
+  useEffect(() => {
+    if (!open) return;
+    const outside = (e: PointerEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false); };
+    const escape = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
+  }, [open]);
 
   const first = new Date(view.getFullYear(), view.getMonth(), 1);
   const offset = (first.getDay() + 6) % 7; // weeks start on Monday
@@ -54,7 +65,7 @@ export default function RangeCalendar({ from, to, min, lang, labels, blocked, de
   const canGoBack = first > parse(min);
 
   return (
-    <div>
+    <div ref={box}>
       <div className={`relative grid grid-cols-2 overflow-hidden rounded-2xl border bg-paper transition-colors ${open ? "border-volt" : "border-line"}`}>
         {([["from", labels.from, from], ["to", labels.to, to]] as const).map(([part, label, value]) => {
           const current = open && (part === "to" ? waitingReturn : !waitingReturn);

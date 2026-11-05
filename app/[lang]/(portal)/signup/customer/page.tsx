@@ -17,7 +17,7 @@ export default async function CustomerSignupPage({ params }: Props) {
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
   return (
-    <AuthShell lang={lang} back={dict.dash.nav.site} wide>
+    <AuthShell lang={lang} back={dict.dash.common.back} wide>
       <CustomerSignupForm lang={lang} dict={dict} />
     </AuthShell>
   );

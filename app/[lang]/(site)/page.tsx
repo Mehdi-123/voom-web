@@ -35,30 +35,30 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
     <>
       {/* ── Hero ── */}
       <section className="night grain relative isolate z-10 overflow-x-clip">
-        <div aria-hidden className="parallax pointer-events-none absolute inset-0 -z-10">
+        <div aria-hidden className="city-blur parallax pointer-events-none absolute inset-0 -z-10">
           <span className="sweep top-[22%] w-[38rem]" style={{ animationDelay: "0s" }} />
           <span className="sweep top-[48%] w-[26rem]" style={{ animationDelay: "1.8s", opacity: 0.6 }} />
           <span className="sweep top-[74%] w-[32rem]" style={{ animationDelay: "3.4s" }} />
         </div>
         <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-24 pt-32 lg:grid-cols-[1.25fr_1fr] lg:pb-28 lg:pt-36">
           <div>
-            <Reveal>
+            <Reveal className="city-blur">
               <p className="glass mb-8 inline-flex items-center gap-3 rounded-full px-4 py-2 text-sm font-semibold text-volt-soft">
                 <span className="relative flex h-2.5 w-2.5"><span aria-hidden className="absolute inset-0 rounded-full bg-go" style={{ animation: "pulse-ring 2s ease-out infinite" }} /><span className="relative h-2.5 w-2.5 rounded-full bg-go" /></span>
                 {dict.hero.eyebrow}
               </p>
             </Reveal>
-            <Reveal as="h1" variant="none" className="font-display text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
+            <Reveal as="h1" variant="none" className="city-blur font-display text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
               <Words text={dict.hero.title} />
             </Reveal>
-            <Reveal delay={500}><p className="mt-8 max-w-xl text-lg leading-relaxed text-white/65 sm:text-xl">{dict.hero.subtitle}</p></Reveal>
-            <Reveal delay={650} className="mt-10"><CitySearch lang={lang} label={dict.hero.cityLabel} button={dict.hero.search} /></Reveal>
-            <Reveal delay={800} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-white/60">
+            <Reveal delay={500} className="city-blur"><p className="mt-8 max-w-xl text-lg leading-relaxed text-white/65 sm:text-xl">{dict.hero.subtitle}</p></Reveal>
+            <Reveal delay={650} className="mt-10"><CitySearch lang={lang} label={dict.hero.cityLabel} allLabel={dict.catalog.allCities} button={dict.hero.search} /></Reveal>
+            <Reveal delay={800} className="city-blur mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-white/60">
               {dict.hero.chips.map((c) => <span key={c} className="flex items-center gap-2"><span className="text-go">✓</span>{c}</span>)}
             </Reveal>
           </div>
 
-          <Reveal variant="side" delay={300} className="relative mx-auto w-full max-w-sm lg:max-w-none">
+          <Reveal variant="side" delay={300} className="city-blur relative mx-auto w-full max-w-sm lg:max-w-none">
             <div className="float [--r:4deg]"><AppPhone shot="home" alt={dict.mock.explore} priority /></div>
             <div className="glass float absolute start-0 top-24 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:-4deg] sm:-start-6 sm:block lg:-start-10" style={{ animationDelay: "-2s" }}>
               <span className="text-go">✓</span> {dict.mock.chipConfirmed}
@@ -96,7 +96,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             {CITIES.map((c, i) => (
               <Reveal key={c.slug} delay={(i % 4) * 80} className={i === 0 ? "col-span-2 row-span-2" : i === CITIES.length - 1 ? "col-span-2" : ""}>
                 <Link
-                  href={`/${lang}/cities/${c.slug}`}
+                  href={`/${lang}/cars?city=${c.slug}`}
                   className="group relative flex h-full flex-col justify-end overflow-hidden rounded-[2rem] p-6 transition-transform duration-500 hover:-translate-y-1"
                   style={{ background: `linear-gradient(145deg, hsl(${HUES[i]} 55% 14%), hsl(${HUES[i]} 70% 34%))` }}
                 >

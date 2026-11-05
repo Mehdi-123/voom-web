@@ -56,20 +56,6 @@ const en: Dictionary = {
     appStore: "App Store",
     playStore: "Google Play",
   },
-  city: {
-    h1: "Car rental in {city}",
-    intro: "Find a car to rent in {city} from verified agencies: economy cars, sedans, SUVs and more. Prices are per day, in dirhams, and you pay on site.",
-    countOne: "{count} car available",
-    countMany: "{count} cars available",
-    noneTitle: "No cars available right now",
-    noneText: "Agencies in {city} are joining Voom. Check back soon or look at another city.",
-    otherCities: "Other cities",
-    faqTitle: "Renting a car in {city}",
-    faq: [
-      { q: "How much does a rental in {city} cost?", a: "The price depends on the model and the agency. Every listing shows the price per day in dirhams." },
-      { q: "Do I need a driving licence?", a: "Yes, a valid driving licence and an ID document are required before your first booking." },
-    ],
-  },
   book: {
     title: "Book this car",
     chooseDates: "Choose your dates",
@@ -125,7 +111,6 @@ const en: Dictionary = {
     photoClose: "Close",
     photoOpen: "Open the photo",
     photoCount: "Photo {n} of {total}",
-    back: "Back to {city}",
     howTitle: "How to book this car",
   },
   agencies: {
@@ -167,7 +152,7 @@ const en: Dictionary = {
     metaTitle: "Cars to rent in Morocco",
     metaDescription: "Browse every car available on Voom: filter by city, dates, category, gearbox, fuel, seats and price.",
     h1: "All cars",
-    intro: "Pick your dates, then narrow down by city, type and price. Booking is done in the Voom app, and you pay the agency on pickup.",
+    intro: "Pick your dates, then narrow down by city, type and price. Book on the website or in the Voom app, and pay the agency on pickup.",
     search: "Search a make or model",
     filters: "Filters",
     hideFilters: "Hide filters",

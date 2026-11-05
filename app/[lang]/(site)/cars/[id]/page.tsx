@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LOCALES, fill, formatPrice, getDictionary, hasLocale } from "@/lib/i18n";
-import { citySlugFor, localizedCityName } from "@/lib/cities";
+import { localizedCityName } from "@/lib/cities";
 import { getCar, getCars } from "@/lib/cars";
 import { alternatesFor } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
@@ -11,8 +10,13 @@ import JsonLd from "@/components/JsonLd";
 import CarGallery from "@/components/CarGallery";
 import BookingPanel from "@/components/BookingPanel";
 import Reveal from "@/components/Reveal";
+import LightHeader from "@/components/LightHeader";
+import BackLink from "@/components/BackLink";
 
 type Props = { params: Promise<{ lang: string; id: string }> };
+
+// Cars are prepared in advance, but one added later is built on first visit: skip the dev-only instant-navigation check
+export const instant = false;
 
 /**
  * The cars that exist when the site is built are prepared in advance; a car added later is built the first time someone opens it.
@@ -49,7 +53,6 @@ export default async function CarPage({ params }: Props) {
   const name = `${car.make} ${car.model} ${car.year}`;
   const cityName = localizedCityName(car.city, lang);
   const images = car.images ?? [];
-  const citySlug = citySlugFor(car.city);
   const labels = dict.labels;
   const category = labels.category[car.category as keyof typeof labels.category] ?? car.category;
   const specs = [
@@ -84,18 +87,15 @@ export default async function CarPage({ params }: Props) {
         }}
       />
 
-      {/* A dark band holds the floating header; the page itself is a white sheet */}
-      <div className="bg-night">
-      <div className="mt-24 rounded-t-[2.5rem] bg-white text-ink sm:mt-28">
-      <div className="mx-auto max-w-6xl px-5 pb-24 pt-10 sm:pt-12">
-        {citySlug ? (
-          <Link href={`/${lang}/cities/${citySlug}`} className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-5 py-2 text-sm font-semibold transition-colors hover:bg-line/60">
-            <span className="rtl:rotate-180">←</span> {fill(dict.car.back, { city: cityName })}
-          </Link>
-        ) : null}
+      <div className="bg-white text-ink">
+      <LightHeader />
+      <div className="mx-auto max-w-6xl px-5 pb-24 pt-32 sm:pt-40">
+        <BackLink href={`/${lang}/cars`} label={dict.dash.common.back} className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-5 py-2 text-sm font-semibold transition-colors hover:bg-line/60">
+          <span className="rtl:rotate-180">←</span> {dict.dash.common.back}
+        </BackLink>
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <Reveal variant="none" className="min-w-0">
+          <Reveal variant="none" className="min-w-0 lg:sticky lg:top-28 lg:self-start">
             <CarGallery
               images={images}
               name={name}
@@ -103,14 +103,14 @@ export default async function CarPage({ params }: Props) {
             />
           </Reveal>
 
-          <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+          <aside className="space-y-6">
             <div>
               <h1 className="font-display text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl">{name}</h1>
               <p className="mt-3 text-lg text-muted">{cityName}</p>
               {hasReviews ? <p className="mt-2 text-sm font-semibold text-volt-mid">★ {fill(dict.car.rating, { rating: car.rating!.toFixed(1), count: car.review_count! })}</p> : null}
             </div>
 
-            <div className="rounded-[2rem] bg-gradient-to-br from-volt-deep to-volt-mid p-7">
+            <div className="rounded-[2rem] bg-gradient-to-br from-volt-deep to-volt-mid p-7 text-white">
               <p className="text-sm text-white/70">{dict.car.from}</p>
               <p className="flex items-baseline gap-2">
                 <span className="font-display text-5xl font-extrabold">{formatPrice(car.price_per_day, lang)}</span>
@@ -155,7 +155,6 @@ export default async function CarPage({ params }: Props) {
           </ol>
           <div className="mt-10"><StoreBadges dict={dict} /></div>
         </section>
-      </div>
       </div>
       </div>
     </>

@@ -55,20 +55,6 @@ const fr = {
     appStore: "App Store",
     playStore: "Google Play",
   },
-  city: {
-    h1: "Location de voiture à {city}",
-    intro: "Trouvez une voiture à louer à {city} auprès d'agences vérifiées : économiques, berlines, SUV et plus. Les prix sont par jour, en dirhams, et le paiement se fait sur place.",
-    countOne: "{count} voiture disponible",
-    countMany: "{count} voitures disponibles",
-    noneTitle: "Aucune voiture disponible pour le moment",
-    noneText: "Les agences de {city} rejoignent Voom. Revenez bientôt ou consultez une autre ville.",
-    otherCities: "Autres villes",
-    faqTitle: "Louer une voiture à {city}",
-    faq: [
-      { q: "Quel est le prix d'une location à {city} ?", a: "Le prix dépend du modèle et de l'agence. Chaque annonce affiche le prix par jour en dirhams." },
-      { q: "Faut-il un permis de conduire ?", a: "Oui, un permis de conduire valide et une pièce d'identité sont demandés avant la première réservation." },
-    ],
-  },
   book: {
     title: "Réservez cette voiture",
     chooseDates: "Choisissez vos dates",
@@ -124,7 +110,6 @@ const fr = {
     photoClose: "Fermer",
     photoOpen: "Ouvrir la photo",
     photoCount: "Photo {n} sur {total}",
-    back: "Retour à {city}",
     howTitle: "Comment réserver cette voiture",
   },
   agencies: {
@@ -166,7 +151,7 @@ const fr = {
     metaTitle: "Voitures à louer au Maroc",
     metaDescription: "Parcourez toutes les voitures disponibles sur Voom : filtrez par ville, dates, catégorie, boîte, carburant, places et prix.",
     h1: "Toutes les voitures",
-    intro: "Choisissez vos dates, puis affinez par ville, type et prix. La réservation se fait dans l'application Voom et vous payez l'agence au retrait.",
+    intro: "Choisissez vos dates, puis affinez par ville, type et prix. Réservez sur le site ou dans l'application Voom, et payez l'agence au retrait.",
     search: "Rechercher une marque ou un modèle",
     filters: "Filtres",
     hideFilters: "Masquer les filtres",

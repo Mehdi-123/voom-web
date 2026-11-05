@@ -15,7 +15,7 @@ export default function Footer({ lang, dict }: { lang: Locale; dict: Dictionary 
           <h2 className="mb-4 text-sm font-semibold text-white">{dict.footer.explore}</h2>
           <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             {CITIES.slice(0, 6).map((c) => (
-              <li key={c.slug}><Link href={`/${lang}/cities/${c.slug}`} className="hover:text-white">{c.names[lang]}</Link></li>
+              <li key={c.slug}><Link href={`/${lang}/cars?city=${c.slug}`} className="hover:text-white">{c.names[lang]}</Link></li>
             ))}
             <li><Link href={`/${lang}/cars`} className="hover:text-white">{dict.nav.cars}</Link></li>
             <li><Link href={`/${lang}/agencies`} className="hover:text-white">{dict.nav.agencies}</Link></li>

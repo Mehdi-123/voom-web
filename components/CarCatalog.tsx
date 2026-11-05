@@ -4,15 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import type { Dictionary } from "@/dictionaries/fr";
 import { fill, formatPrice, type Locale } from "@/lib/i18n";
 import type { Car } from "@/lib/cars";
-import { localizedCityName } from "@/lib/cities";
+import { cityOptions, citySlugFor } from "@/lib/cities";
 import { supabase } from "@/lib/supabase";
 import { CATEGORIES, FUELS, TRANSMISSIONS } from "@/lib/car-options";
 import CarCard from "./CarCard";
+import CityCombobox from "./CityCombobox";
 import { CloseIcon } from "./Icons";
 import RangeCalendar from "./RangeCalendar";
 
 type Filters = { q: string; city: string; category: string; transmission: string; fuel: string; seats: number; max: number | null; from: string; to: string; sort: string };
 const EMPTY: Filters = { q: "", city: "", category: "", transmission: "", fuel: "", seats: 0, max: null, from: "", to: "", sort: "new" };
+
+/** A car's city as the filter knows it: the city's slug, or the stored name for a city without a page. */
+const cityKey = (name: string) => citySlugFor(name) ?? name;
 
 const todayIso = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
 
@@ -30,14 +34,19 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
   const prices = cars.map((c) => c.price_per_day);
   const ceiling = Math.max(100, ...prices);
   const floor = Math.min(...prices, ceiling);
-  const cities = useMemo(() => [...new Set(cars.map((c) => c.city))].sort(), [cars]);
+  // Every city, plus any city a car is listed in that is not in the list
+  const cityChoices = useMemo(() => {
+    const all = cityOptions(lang);
+    const extra = [...new Set(cars.map((c) => cityKey(c.city)))].filter((k) => !all.some((o) => o.key === k)).sort().map((k) => ({ key: k, label: k }));
+    return [...all, ...extra];
+  }, [cars, lang]);
 
   // The address carries the filters in, and out
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setF({
-      q: p.get("q") ?? "", city: p.get("city") ?? "", category: p.get("cat") ?? "", transmission: p.get("trans") ?? "", fuel: p.get("fuel") ?? "",
+      q: p.get("q") ?? "", city: p.get("city") ? cityKey(p.get("city")!) : "", category: p.get("cat") ?? "", transmission: p.get("trans") ?? "", fuel: p.get("fuel") ?? "",
       seats: Number(p.get("seats")) || 0, max: p.get("max") ? Number(p.get("max")) : null, from: p.get("from") ?? "", to: p.get("to") ?? "", sort: p.get("sort") ?? "new",
     });
     setLoadedFromUrl(true);
@@ -79,7 +88,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
     const needle = f.q.trim().toLowerCase();
     const list = cars.filter((c) =>
       (!needle || `${c.make} ${c.model}`.toLowerCase().includes(needle)) &&
-      (!f.city || c.city === f.city) && (!f.category || c.category === f.category) &&
+      (!f.city || cityKey(c.city) === f.city) && (!f.category || c.category === f.category) &&
       (!f.transmission || c.transmission === f.transmission) && (!f.fuel || c.fuel === f.fuel) &&
       (!f.seats || c.seats >= f.seats) && (f.max === null || c.price_per_day <= f.max) &&
       (!freeIds || freeIds.has(c.id)));
@@ -88,7 +97,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
   }, [cars, f, freeIds]);
 
   const active = [f.q, f.city, f.category, f.transmission, f.fuel, f.seats || "", f.max !== null ? "x" : "", f.from || f.to ? "x" : ""].filter(Boolean).length;
-  const chip = (on: boolean) => `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${on ? "border-volt bg-volt text-white" : "border-line bg-paper text-ink/75 hover:border-volt/50"}`;
+  const chip = (on: boolean, surface: "paper" | "white" = "paper") => `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${on ? "border-volt bg-volt text-white" : `border-line ${surface === "white" ? "bg-white" : "bg-paper"} text-ink/75 hover:border-volt/50`}`;
   const label = "mb-2.5 block text-xs font-bold uppercase tracking-wider text-muted";
   const input = "h-12 w-full rounded-2xl border border-line bg-paper px-4 text-base text-ink outline-none transition-colors focus:border-volt";
   const labels = dict.labels;
@@ -110,15 +119,10 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
         {periodFailed ? <p className="mt-2 text-xs text-[#9a6700]">{t.periodUnavailable}</p> : null}
       </div>
 
-      {cities.length > 1 ? (
-        <div>
-          <span className={label}>{t.city}</span>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => set("city", "")} className={chip(!f.city)}>{t.allCities}</button>
-            {cities.map((c) => <button key={c} type="button" onClick={() => set("city", c)} className={chip(f.city === c)}>{localizedCityName(c, lang)}</button>)}
-          </div>
-        </div>
-      ) : null}
+      <div>
+        <span className={label}>{t.city}</span>
+        <CityCombobox id="catalog-city" options={cityChoices} value={f.city} onChange={(key) => set("city", key)} label={t.city} allLabel={t.allCities} variant="field" />
+      </div>
 
       <div>
         <span className={label}>{t.category}</span>
@@ -181,7 +185,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
         <div className="no-scrollbar -mx-5 mb-6 flex items-center gap-2 overflow-x-auto px-5 sm:mx-0 sm:px-0" role="radiogroup" aria-label={t.sort}>
           <span className="shrink-0 text-xs font-bold uppercase tracking-wider text-muted">{t.sort}</span>
           {([["new", t.sortNew], ["asc", t.sortPriceAsc], ["desc", t.sortPriceDesc], ["rating", t.sortRating]] as const).map(([value, text]) => (
-            <button key={value} type="button" role="radio" aria-checked={f.sort === value} onClick={() => set("sort", value)} className={`shrink-0 ${chip(f.sort === value)}`}>{text}</button>
+            <button key={value} type="button" role="radio" aria-checked={f.sort === value} onClick={() => set("sort", value)} className={`shrink-0 ${chip(f.sort === value, "white")}`}>{text}</button>
           ))}
         </div>
 
