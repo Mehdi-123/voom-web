@@ -15,9 +15,9 @@ export default function CitySearch({ lang, label, allLabel, button }: { lang: Lo
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); router.push(city ? `/${lang}/cars?city=${encodeURIComponent(city)}` : `/${lang}/cars`); }}
-      className="glass relative flex w-full max-w-xl flex-col gap-2 rounded-[2rem] p-2 sm:flex-row sm:rounded-full"
+      className="relative flex w-full max-w-xl flex-col gap-2 rounded-[2rem] border border-fg/12 bg-fg/[0.06] p-2 sm:flex-row sm:rounded-full"
     >
-      <CityCombobox options={options} value={city} onChange={setCity} label={label} allLabel={allLabel} variant="hero" blurPage />
+      <CityCombobox options={options} value={city} onChange={setCity} label={label} allLabel={allLabel} variant="hero" />
       <button type="submit" className="h-14 rounded-full bg-volt px-8 text-base font-bold text-white shadow-lg shadow-volt/40 transition-all hover:bg-volt-soft hover:shadow-volt/60">
         {button} →
       </button>

@@ -14,13 +14,11 @@ type Props = {
   allLabel?: string;
   /** "hero" is the big homepage search field; "field" is a regular form field. The list looks the same in both. */
   variant: "hero" | "field";
-  /** Blur the page behind the open list (the homepage does; see globals.css). */
-  blurPage?: boolean;
   id?: string;
 };
 
 /** A styled city list (not the browser's own menu), with arrow keys, type-ahead, and a click outside to close. */
-export default function CityCombobox({ options, value, onChange, label, allLabel, variant, blurPage = false, id }: Props) {
+export default function CityCombobox({ options, value, onChange, label, allLabel, variant, id }: Props) {
   const listId = useId();
   const box = useRef<HTMLDivElement>(null);
   const typed = useRef({ text: "", at: 0 });
@@ -37,12 +35,6 @@ export default function CityCombobox({ options, value, onChange, label, allLabel
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, [open]);
-
-  useEffect(() => {
-    if (!open || !blurPage) return;
-    document.documentElement.dataset.cityOpen = "";
-    return () => { delete document.documentElement.dataset.cityOpen; };
-  }, [open, blurPage]);
 
   // Keep the highlighted city in view while arrowing through the list
   useEffect(() => {
@@ -116,7 +108,7 @@ export default function CityCombobox({ options, value, onChange, label, allLabel
           id={listId}
           role="listbox"
           aria-label={label}
-          className={`menu-in absolute inset-x-0 z-30 ${up ? "bottom-[calc(100%+0.75rem)]" : "top-[calc(100%+0.75rem)]"} max-h-72 overflow-y-auto rounded-3xl border border-white/12 bg-night/95 p-2 text-white shadow-2xl shadow-black/50 backdrop-blur-xl`}
+          className={`menu-in absolute inset-x-0 z-30 ${up ? "bottom-[calc(100%+0.75rem)]" : "top-[calc(100%+0.75rem)]"} max-h-72 overflow-y-auto rounded-3xl border border-white/12 bg-night/60 p-2 text-white shadow-2xl shadow-black/50 backdrop-blur-2xl`}
         >
           {items.map((o, i) => (
             <li

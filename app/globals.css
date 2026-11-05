@@ -197,12 +197,3 @@ html[dir="rtl"] .leading-\[0\.95\] { line-height: 1.2; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass { background: color-mix(in srgb, var(--color-night) 88%, var(--color-fg) 12%); }
 }
-
-
-/* The homepage city list opens over a softened page: everything except the search box blurs (the box lives inside the hero, so it is marked per part) */
-.city-blur, header, main > :not(:first-child), footer { transition: filter 0.25s ease; }
-html[data-city-open] .city-blur,
-html[data-city-open] header,
-html[data-city-open] main > :not(:first-child),
-html[data-city-open] footer { filter: blur(10px) brightness(0.7); }
-@media (prefers-reduced-motion: reduce) { .city-blur, header, main > :not(:first-child), footer { transition: none; } }
