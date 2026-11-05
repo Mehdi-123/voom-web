@@ -5,7 +5,7 @@ import type { Dictionary } from "@/dictionaries/fr";
 import { fill, formatPrice, type Locale } from "@/lib/i18n";
 import type { Car } from "@/lib/cars";
 import { cityOptions, citySlugFor } from "@/lib/cities";
-import { supabase } from "@/lib/supabase";
+import { sb } from "@/lib/supabase-browser";
 import { CATEGORIES, FUELS, TRANSMISSIONS } from "@/lib/car-options";
 import CarCard from "./CarCard";
 import CityCombobox from "./CityCombobox";
@@ -73,7 +73,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
     if (!validPeriod) { setFreeIds(null); setPeriodFailed(false); return; } // eslint-disable-line react-hooks/set-state-in-effect
     let cancelled = false;
     setChecking(true);
-    supabase.rpc("available_car_ids", { p_from: f.from, p_to: f.to }).then(({ data, error }) => {
+    sb.rpc("available_car_ids", { p_from: f.from, p_to: f.to }).then(({ data, error }) => {
       if (cancelled) return;
       setChecking(false);
       if (error || !Array.isArray(data)) { setFreeIds(null); setPeriodFailed(true); return; }
@@ -197,7 +197,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {shown.map((car) => <CarCard key={car.id} car={car} lang={lang} dict={dict} className="h-full" />)}
+            {shown.map((car, i) => <CarCard key={car.id} car={car} lang={lang} dict={dict} priority={i < 3} className="h-full" />)}
           </div>
         )}
       </div>

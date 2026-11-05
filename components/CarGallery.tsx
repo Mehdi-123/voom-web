@@ -79,7 +79,7 @@ export default function CarGallery({ images, name, labels }: { images: string[];
   const closeViewer = () => { setViewer(false); requestAnimationFrame(() => goTo(index)); };
 
   if (total === 0) {
-    return <div className="flex aspect-[4/3] items-center justify-center rounded-[2.5rem] bg-paper text-muted">{labels.noPhoto}</div>;
+    return <div className="flex aspect-[4/3] items-center justify-center rounded-[2.5rem] bg-white text-muted">{labels.noPhoto}</div>;
   }
 
   const counter = fill(labels.count, { n: index + 1, total });
@@ -87,7 +87,7 @@ export default function CarGallery({ images, name, labels }: { images: string[];
 
   return (
     <div className="min-w-0">
-      <div className="group relative overflow-hidden rounded-[2.5rem] bg-paper shadow-2xl shadow-volt/20">
+      <div className="group relative overflow-hidden rounded-[2.5rem] bg-white shadow-2xl shadow-volt/20">
         <div ref={track} onScroll={onScroll} className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain">
           {images.map((src, i) => (
             <button
@@ -123,7 +123,7 @@ export default function CarGallery({ images, name, labels }: { images: string[];
               onClick={() => goTo(i)}
               aria-label={fill(labels.count, { n: i + 1, total })}
               aria-current={i === index}
-              className={`relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-2xl bg-paper transition-all sm:w-32 ${i === index ? "ring-2 ring-volt ring-offset-2 ring-offset-white" : "opacity-60 hover:opacity-100"}`}
+              className={`relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-2xl bg-white transition-all sm:w-32 ${i === index ? "ring-2 ring-volt ring-offset-2 ring-offset-paper" : "opacity-60 hover:opacity-100"}`}
             >
               <Image src={src} alt="" fill sizes="128px" className="object-cover" draggable={false} />
             </button>

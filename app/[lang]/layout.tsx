@@ -37,7 +37,7 @@ export default async function RootLayout({ children, params }: Props) {
   if (!hasLocale(lang)) notFound();
 
   return (
-    <html lang={lang} dir={directionOf(lang)} className={`${inter.variable} ${cairo.variable} ${bricolage.variable} ${righteous.variable}`}>
+    <html lang={lang} dir={directionOf(lang)} data-scroll-behavior="smooth" className={`${inter.variable} ${cairo.variable} ${bricolage.variable} ${righteous.variable}`}>
       <body className="flex min-h-screen flex-col">
         <div className="scroll-progress" aria-hidden />
         <JsonLd

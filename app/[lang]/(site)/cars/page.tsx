@@ -6,7 +6,6 @@ import { getCars } from "@/lib/cars";
 import { alternatesFor } from "@/lib/seo";
 import CarCatalog from "@/components/CarCatalog";
 import Reveal from "@/components/Reveal";
-import LightHeader from "@/components/LightHeader";
 import Words from "@/components/Words";
 
 type Props = { params: Promise<{ lang: string }> };
@@ -35,18 +34,18 @@ export default async function CarsPage({ params }: Props) {
 
   return (
     <>
-      <div className="bg-paper text-ink">
-        <LightHeader />
-        <div className="mx-auto max-w-6xl px-5 pb-10 pt-32 sm:pt-40">
-          <Reveal as="h1" variant="none" className="font-display max-w-4xl text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl">
+      <section className="night grain relative isolate overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10"><span className="sweep top-[45%] w-[30rem]" /><span className="sweep top-[75%] w-[20rem]" style={{ animationDelay: "2s" }} /></div>
+        <div className="mx-auto max-w-6xl px-5 pb-14 pt-36 sm:pt-44">
+          <Reveal as="h1" variant="none" className="font-display max-w-4xl text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-7xl">
             <Words text={dict.catalog.h1} />
           </Reveal>
-          <Reveal delay={400}><p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{dict.catalog.intro}</p></Reveal>
+          <Reveal delay={400}><p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/65">{dict.catalog.intro}</p></Reveal>
         </div>
-        <section className="px-5 pb-16 sm:pb-20">
-          <Suspense fallback={null}><CarCatalog cars={cars} lang={lang} dict={dict} /></Suspense>
-        </section>
-      </div>
+      </section>
+      <section className="bg-paper px-5 py-12 text-ink sm:py-16">
+        <Suspense fallback={null}><CarCatalog cars={cars} lang={lang} dict={dict} /></Suspense>
+      </section>
     </>
   );
 }

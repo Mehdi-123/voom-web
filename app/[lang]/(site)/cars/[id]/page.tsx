@@ -10,7 +10,6 @@ import JsonLd from "@/components/JsonLd";
 import CarGallery from "@/components/CarGallery";
 import BookingPanel from "@/components/BookingPanel";
 import Reveal from "@/components/Reveal";
-import LightHeader from "@/components/LightHeader";
 import BackLink from "@/components/BackLink";
 
 type Props = { params: Promise<{ lang: string; id: string }> };
@@ -87,10 +86,9 @@ export default async function CarPage({ params }: Props) {
         }}
       />
 
-      <div className="bg-white text-ink">
-      <LightHeader />
+      <div className="bg-paper text-ink">
       <div className="mx-auto max-w-6xl px-5 pb-24 pt-32 sm:pt-40">
-        <BackLink href={`/${lang}/cars`} label={dict.dash.common.back} className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-5 py-2 text-sm font-semibold transition-colors hover:bg-line/60">
+        <BackLink href={`/${lang}/cars`} label={dict.dash.common.back} className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-5 py-2 text-sm font-semibold transition-colors hover:bg-line/60">
           <span className="rtl:rotate-180">←</span> {dict.dash.common.back}
         </BackLink>
 
@@ -122,7 +120,7 @@ export default async function CarPage({ params }: Props) {
 
             <dl className="grid grid-cols-2 gap-3">
               {specs.map((s) => (
-                <div key={s.label} className="rounded-2xl border border-line bg-paper p-4">
+                <div key={s.label} className="rounded-2xl border border-line bg-white p-4">
                   <dt className="text-xs font-semibold uppercase tracking-wide text-muted">{s.label}</dt>
                   <dd className="mt-1 font-bold">{s.value}</dd>
                 </div>
@@ -136,7 +134,7 @@ export default async function CarPage({ params }: Props) {
             <h2 className="font-display mb-5 text-3xl font-extrabold">{dict.car.features}</h2>
             <ul className="flex flex-wrap gap-2">
               {car.features.map((f) => (
-                <li key={f} className="rounded-full border border-line bg-paper px-5 py-2.5 text-sm font-semibold">{labels.options[f] ?? f}</li>
+                <li key={f} className="rounded-full border border-line bg-white px-5 py-2.5 text-sm font-semibold">{labels.options[f] ?? f}</li>
               ))}
             </ul>
           </section>

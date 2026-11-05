@@ -32,7 +32,7 @@ export default function MobileMenu({ lang, links, loginLabel, accountLabel, menu
         onClick={() => setOpen(true)}
         aria-label={menuLabel}
         aria-expanded={open}
-        className="header-burger flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-[5px] rounded-full bg-white/10 transition-colors active:bg-white/20"
+        className="flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-[5px] rounded-full bg-white/10 transition-colors active:bg-white/20"
       >
         <span className="h-0.5 w-4 rounded-full bg-white" />
         <span className="h-0.5 w-2.5 self-end rounded-full bg-white ltr:me-3 rtl:ms-3" />

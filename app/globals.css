@@ -206,21 +206,3 @@ html[data-city-open] header,
 html[data-city-open] main > :not(:first-child),
 html[data-city-open] footer { filter: blur(10px) brightness(0.7); }
 @media (prefers-reduced-motion: reduce) { .city-blur, header, main > :not(:first-child), footer { transition: none; } }
-
-/* Light pages (all cars, car details): the floating header turns light too, so no dark strip sits above the page.
-   The page carries a LightHeader marker, which marks itself off (`data-off`) while its page is hidden. */
-.logo-on-light { display: none; }
-html:has([data-header-light]:not([data-off])) .logo-on-dark { display: none; }
-html:has([data-header-light]:not([data-off])) .logo-on-light { display: inline; }
-html:has([data-header-light]:not([data-off])) .topbar {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(11, 10, 20, 0.1);
-  color: var(--color-ink);
-  box-shadow: 0 14px 40px rgba(11, 10, 20, 0.1);
-  --color-fg: #14121f;
-  --color-page: #ffffff;
-}
-html:has([data-header-light]:not([data-off])) .header-links { color: rgba(11, 10, 20, 0.7); }
-html:has([data-header-light]:not([data-off])) .header-links a:hover { color: var(--color-ink); }
-html:has([data-header-light]:not([data-off])) .header-burger { background: rgba(11, 10, 20, 0.08); }
-html:has([data-header-light]:not([data-off])) .header-burger span { background: var(--color-ink); }
