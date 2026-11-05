@@ -118,7 +118,7 @@ html[dir="rtl"] .sweep { background: linear-gradient(270deg, transparent, var(--
 }
 
 /* Frosted bars: see-through enough that what scrolls underneath is visibly blurred */
-.topbar { background: rgba(15, 13, 28, 0.58); border: 1px solid rgba(255, 255, 255, 0.16); backdrop-filter: blur(24px) saturate(1.6); }
+.topbar { background: #0f0d1c60; border: 1px solid rgba(255, 255, 255, 0.16); backdrop-filter: blur(24px) saturate(1.6); }
 .dash-light .topbar { background: rgba(255, 255, 255, 0.6); border-color: rgba(20, 18, 31, 0.1); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .topbar { background: rgba(15, 13, 28, 0.94); }
