@@ -1,7 +1,7 @@
 import type dashFr from "./dash.fr";
 
 const dash: typeof dashFr = {
-  common: { loading: "جارٍ التحميل…", save: "حفظ", saving: "جارٍ الحفظ…", saved: "تم الحفظ", cancel: "إلغاء", back: "رجوع", edit: "تعديل", delete: "حذف", error: "حدث خطأ. حاول مرة أخرى.", retry: "حاول مرة أخرى", signOutTitle: "تسجيل الخروج؟", signOutText: "ستحتاج إلى تسجيل الدخول مجددًا للوصول إلى لوحتك.", adminName: "المشرف", signOut: "تسجيل الخروج", seeAll: "عرض الكل", optional: "اختياري", days: "{n} أيام", day: "يوم واحد", themeLight: "الوضع الفاتح", themeDark: "الوضع الداكن", collapse: "تصغير القائمة", expand: "توسيع القائمة", appearance: "المظهر", roleAgency: "وكالة", roleAdmin: "مشرف", roleCustomer: "عميل", myProfile: "ملفي الشخصي" },
+  common: { loading: "جارٍ التحميل…", save: "حفظ", saving: "جارٍ الحفظ…", saved: "تم الحفظ", cancel: "إلغاء", back: "رجوع", edit: "تعديل", delete: "حذف", error: "حدث خطأ. حاول مرة أخرى.", retry: "حاول مرة أخرى", signOutTitle: "تسجيل الخروج؟", signOutText: "ستحتاج إلى تسجيل الدخول مجددًا للوصول إلى لوحتك.", adminName: "المشرف", signOut: "تسجيل الخروج", seeAll: "عرض الكل", optional: "اختياري", days: "{n} أيام", day: "يوم واحد", themeLight: "الوضع الفاتح", themeDark: "الوضع الداكن", collapse: "تصغير القائمة", expand: "توسيع القائمة", appearance: "المظهر", roleAgency: "وكالة", roleAdmin: "مشرف", roleCustomer: "عميل", myProfile: "ملفي الشخصي", showPassword: "إظهار كلمة المرور", hidePassword: "إخفاء كلمة المرور" },
   status: { pending: "قيد الانتظار", confirmed: "مؤكَّد", active: "جارٍ", completed: "مكتمل", cancelled: "ملغى", no_show: "لم يحضر العميل", approved: "مقبول", rejected: "مرفوض" },
   nav: { overview: "نظرة عامة", bookings: "الحجوزات", fleet: "سياراتي", profile: "الملف الشخصي", review: "المراجعات", site: "العودة إلى الموقع", menu: "القائمة", earnings: "الأرباح", notifications: "الإشعارات" },
   auth: {
@@ -85,6 +85,7 @@ const dash: typeof dashFr = {
     docsHint: "JPG أو PNG، 8 ميغابايت كحد أقصى",
     docsSend: "إرسال وثائقي",
     docsSending: "جارٍ الإرسال…",
+    docsCount: "تمت إضافة {n} من {total}",
     docsFailed: "فشل الإرسال. حاول مرة أخرى.",
     docsNeedAll: "أضف الصور الأربع لإرسالها.",
     skip: "تخطَّ هذه الخطوة",

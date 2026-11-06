@@ -11,6 +11,7 @@ import { MOROCCAN_CITIES } from "@/lib/moroccan-cities";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { formatPhone, isValidPhone } from "@/lib/phone";
 import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, SelectInput, TextInput } from "./ui";
+import PasswordInput from "./PasswordInput";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 import Turnstile from "./Turnstile";
 import { turnstileEnabled } from "@/lib/turnstile";
@@ -219,7 +220,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
         <>
           <Field label={t.email} error={errors.email}><TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t.emailPlaceholder} invalid={!!errors.email} autoComplete="email" /></Field>
           <Field label={t.password} error={errors.password}>
-            <TextInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
+            <PasswordInput common={dict.dash.common} value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
               {rules.map((r) => (
                 <li key={r.label} className={`flex items-center gap-2 text-sm ${r.ok ? "text-go" : "text-fg/45"}`}>
@@ -229,7 +230,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
               ))}
             </ul>
           </Field>
-          <Field label={t.confirmPassword} error={errors.confirm ?? mismatch}><TextInput type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} invalid={!!(errors.confirm ?? mismatch)} autoComplete="new-password" /></Field>
+          <Field label={t.confirmPassword} error={errors.confirm ?? mismatch}><PasswordInput common={dict.dash.common} value={confirm} onChange={(e) => setConfirm(e.target.value)} invalid={!!(errors.confirm ?? mismatch)} autoComplete="new-password" /></Field>
           <div>
             <Checkbox checked={accepted} onChange={setAccepted} invalid={!!errors.accepted}>
               {t.accept}{" "}

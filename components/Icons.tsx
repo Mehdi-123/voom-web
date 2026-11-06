@@ -104,3 +104,10 @@ export const KeyIcon = ({ className = "" }: { className?: string }) => (
 export const CarPlusIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" /><path d="M19 2.5v5M16.5 5h5" /></svg>
 );
+
+export const EyeIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></svg>
+);
+export const EyeOffIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M17.9 17.9A10.4 10.4 0 0112 19c-6.5 0-10-7-10-7a17.6 17.6 0 014.1-5M9.9 5.2A9.6 9.6 0 0112 5c6.5 0 10 7 10 7a17.7 17.7 0 01-2.2 3.2M14.1 14.1a3 3 0 01-4.2-4.2M3 3l18 18" /></svg>
+);

@@ -13,25 +13,25 @@ export default function IdentityCard() {
   if (!identity) return null;
 
   const view = {
-    none: { title: m.idNone, text: m.idNoneText, tone: "border-warn/40 bg-warn/10", icon: "bg-warn/20 text-warn" },
-    pending: { title: m.idPending, text: m.idPendingText, tone: "border-volt/40 bg-volt/10", icon: "bg-volt/20 text-volt-soft" },
-    approved: { title: m.idApproved, text: m.idApprovedText, tone: "border-go/40 bg-go/10", icon: "bg-go/20 text-go" },
-    rejected: { title: m.idRejected, text: m.idRejectedText, tone: "border-danger/40 bg-danger/10", icon: "bg-danger/20 text-danger" },
+    none: { title: m.idNone, text: m.idNoneText, icon: "bg-warn/20 text-warn" },
+    pending: { title: m.idPending, text: m.idPendingText, icon: "bg-volt/20 text-volt-soft" },
+    approved: { title: m.idApproved, text: m.idApprovedText, icon: "bg-go/20 text-go" },
+    rejected: { title: m.idRejected, text: m.idRejectedText, icon: "bg-danger/20 text-danger" },
   }[identity.status];
 
   const needsDocs = identity.status === "none" || identity.status === "rejected";
 
   return (
-    <div className={`rounded-3xl border p-5 ${view.tone}`}>
+    <section className="rounded-3xl border border-fg/12 bg-night p-5 shadow-sm shadow-black/5 sm:p-7">
       <div className="flex items-start gap-4">
-        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${view.icon}`}><ShieldIcon className="h-5 w-5" /></span>
+        <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${view.icon}`}><ShieldIcon className="h-6 w-6" /></span>
         <div className="min-w-0">
-          <p className="font-bold">{view.title}</p>
-          <p className="mt-1 text-sm text-fg/70">{view.text}</p>
+          <h2 className="font-display text-xl font-extrabold tracking-tight">{view.title}</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-fg/65">{view.text}</p>
           {identity.status === "rejected" && identity.reason ? <p className="mt-2 text-sm"><span className="font-semibold">{m.idReason}:</span> {identity.reason}</p> : null}
         </div>
       </div>
       {needsDocs ? <IdentityUpload /> : null}
-    </div>
+    </section>
   );
 }

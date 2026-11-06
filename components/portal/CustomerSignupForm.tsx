@@ -13,6 +13,8 @@ import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { formatPhone, isValidPhone } from "@/lib/phone";
 import { turnstileEnabled } from "@/lib/turnstile";
 import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, TextInput } from "./ui";
+import PasswordInput from "./PasswordInput";
+import { useAuth } from "./AuthProvider";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 import Turnstile from "./Turnstile";
 import IdentityPhotos from "./IdentityPhotos";
@@ -26,6 +28,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const t = dict.dash.auth;
   const router = useRouter();
+  const { refresh } = useAuth();
   const nextSuffix = useNextSuffix(lang);
   const [step, setStep] = useState(1);
   const [coding, setCoding] = useState(false);
@@ -96,6 +99,8 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
     // Documents are optional. If they were all added they go up now; if that fails the account page offers them again.
     const userId = data.user?.id ?? (await sb.auth.getSession()).data.session?.user.id;
     const sent = userId && hasAllDocs(docs) ? await uploadIdentity(userId, docs) : true;
+    // The account state was read as soon as the code was accepted, before the documents were filed
+    await refresh();
     router.replace((sent && readNext(lang)) || `/${lang}/dashboard`);
   }
 
@@ -164,7 +169,7 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
         <>
           <Field label={t.email} error={errors.email}><TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t.emailPlaceholder} invalid={!!errors.email} autoComplete="email" /></Field>
           <Field label={t.password} error={errors.password}>
-            <TextInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
+            <PasswordInput common={dict.dash.common} value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
               {rules.map((r) => (
                 <li key={r.label} className={`flex items-center gap-2 text-sm ${r.ok ? "text-go" : "text-fg/45"}`}>
@@ -174,7 +179,7 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
               ))}
             </ul>
           </Field>
-          <Field label={t.confirmPassword} error={errors.confirm ?? mismatch}><TextInput type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} invalid={!!(errors.confirm ?? mismatch)} autoComplete="new-password" /></Field>
+          <Field label={t.confirmPassword} error={errors.confirm ?? mismatch}><PasswordInput common={dict.dash.common} value={confirm} onChange={(e) => setConfirm(e.target.value)} invalid={!!(errors.confirm ?? mismatch)} autoComplete="new-password" /></Field>
           <div>
             <Checkbox checked={accepted} onChange={setAccepted} invalid={!!errors.accepted}>
               {t.accept}{" "}

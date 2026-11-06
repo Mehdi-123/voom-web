@@ -1,7 +1,7 @@
 import type dashFr from "./dash.fr";
 
 const dash: typeof dashFr = {
-  common: { loading: "Loading…", save: "Save", saving: "Saving…", saved: "Saved", cancel: "Cancel", back: "Back", edit: "Edit", delete: "Delete", error: "Something went wrong. Try again.", retry: "Try again", signOutTitle: "Sign out?", signOutText: "You will need to sign in again to reach your dashboard.", adminName: "Admin", signOut: "Sign out", seeAll: "See all", optional: "Optional", days: "{n} days", day: "1 day", themeLight: "Light mode", themeDark: "Dark mode", collapse: "Collapse the menu", expand: "Expand the menu", appearance: "Appearance", roleAgency: "Agency", roleAdmin: "Administrator", roleCustomer: "Renter", myProfile: "My profile" },
+  common: { loading: "Loading…", save: "Save", saving: "Saving…", saved: "Saved", cancel: "Cancel", back: "Back", edit: "Edit", delete: "Delete", error: "Something went wrong. Try again.", retry: "Try again", signOutTitle: "Sign out?", signOutText: "You will need to sign in again to reach your dashboard.", adminName: "Admin", signOut: "Sign out", seeAll: "See all", optional: "Optional", days: "{n} days", day: "1 day", themeLight: "Light mode", themeDark: "Dark mode", collapse: "Collapse the menu", expand: "Expand the menu", appearance: "Appearance", roleAgency: "Agency", roleAdmin: "Administrator", roleCustomer: "Renter", myProfile: "My profile", showPassword: "Show password", hidePassword: "Hide password" },
   status: { pending: "Pending", confirmed: "Confirmed", active: "In progress", completed: "Completed", cancelled: "Cancelled", no_show: "No-show", approved: "Approved", rejected: "Rejected" },
   nav: { overview: "Overview", bookings: "Bookings", fleet: "My cars", profile: "Profile", review: "Reviews", site: "Back to site", menu: "Menu", earnings: "Earnings", notifications: "Notifications" },
   auth: {
@@ -85,6 +85,7 @@ const dash: typeof dashFr = {
     docsHint: "JPG or PNG, 8 MB maximum",
     docsSend: "Send my documents",
     docsSending: "Sending…",
+    docsCount: "{n} of {total} added",
     docsFailed: "Upload failed. Please try again.",
     docsNeedAll: "Add all four photos to send them.",
     skip: "Skip this step",

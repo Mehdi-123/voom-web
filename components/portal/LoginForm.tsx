@@ -10,6 +10,7 @@ import { authErrorMessage } from "@/lib/auth-errors";
 import { useAuth } from "./AuthProvider";
 import { readNext, useNextSuffix } from "@/lib/next-path";
 import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
+import PasswordInput from "./PasswordInput";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 
 /** Email and password. If the email was never verified, the same card asks for the code we just sent. */
@@ -105,7 +106,7 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
         <TextInput type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} placeholder={t.emailPlaceholder} autoComplete="email" autoCapitalize="none" invalid={!!error?.fields.includes("email")} />
       </Field>
       <Field label={t.password} error={error?.fields.includes("password") ? error.message : undefined}>
-        <TextInput type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="••••••••" autoComplete="current-password" invalid={!!error?.fields.includes("password")} />
+        <PasswordInput common={dict.dash.common} value={password} onChange={(e) => { setPassword(e.target.value); setError(null); }} placeholder="••••••••" autoComplete="current-password" invalid={!!error?.fields.includes("password")} />
       </Field>
       <div className="flex justify-end pt-1">
         <Link href={`/${lang}/forgot`} className="text-sm font-semibold text-volt-soft hover:underline">{t.forgot}</Link>

@@ -4,7 +4,8 @@ import { FormEvent, useState } from "react";
 import { sb } from "@/lib/supabase-browser";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { useDash } from "./DashContext";
-import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
+import { ErrorNote, Field, PrimaryButton } from "./ui";
+import PasswordInput from "./PasswordInput";
 
 /** Change the password: the current one is checked first, like in the app. */
 export default function PasswordForm({ email }: { email: string }) {
@@ -43,9 +44,9 @@ export default function PasswordForm({ email }: { email: string }) {
   return (
     <form onSubmit={submit} className="glass space-y-6 rounded-3xl p-6">
       <h2 className="font-bold">{p.security}</h2>
-      <Field label={p.currentPassword}><TextInput type="password" value={current} onChange={(e) => { setCurrent(e.target.value); setDone(false); }} autoComplete="current-password" /></Field>
+      <Field label={p.currentPassword}><PasswordInput common={t.common} value={current} onChange={(e) => { setCurrent(e.target.value); setDone(false); }} autoComplete="current-password" /></Field>
       <Field label={p.newPassword}>
-        <TextInput type="password" value={password} onChange={(e) => { setPassword(e.target.value); setDone(false); }} autoComplete="new-password" />
+        <PasswordInput common={t.common} value={password} onChange={(e) => { setPassword(e.target.value); setDone(false); }} autoComplete="new-password" />
         <ul className="mt-4 space-y-2">
           {rules.map((r) => (
             <li key={r.label} className={`flex items-center gap-2 text-sm ${r.ok ? "text-go" : "text-fg/45"}`}>
@@ -55,7 +56,7 @@ export default function PasswordForm({ email }: { email: string }) {
           ))}
         </ul>
       </Field>
-      <Field label={p.confirmPassword}><TextInput type="password" value={confirm} onChange={(e) => { setConfirm(e.target.value); setDone(false); }} autoComplete="new-password" invalid={!!confirm && confirm !== password} /></Field>
+      <Field label={p.confirmPassword}><PasswordInput common={t.common} value={confirm} onChange={(e) => { setConfirm(e.target.value); setDone(false); }} autoComplete="new-password" invalid={!!confirm && confirm !== password} /></Field>
       {error ? <ErrorNote>{error}</ErrorNote> : null}
       <PrimaryButton type="submit" loading={busy} disabled={!current || !isStrongPassword(password) || password !== confirm} className="sm:w-auto sm:min-w-48">{done ? `✓ ${p.passwordUpdated}` : p.updatePassword}</PrimaryButton>
     </form>

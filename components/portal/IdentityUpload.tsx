@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { emptyDocs, hasAllDocs, uploadIdentity, type DocFiles } from "@/lib/identity-docs";
+import { IDENTITY_DOCS, emptyDocs, hasAllDocs, uploadIdentity, type DocFiles } from "@/lib/identity-docs";
+import { fill } from "@/lib/i18n";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
 import IdentityPhotos from "./IdentityPhotos";
@@ -26,11 +27,21 @@ export default function IdentityUpload() {
     await refresh();
   }
 
+  const added = IDENTITY_DOCS.filter((d) => files[d.key]).length;
+
   return (
-    <div className="mt-5 max-w-xl space-y-4">
-      <IdentityPhotos dict={dict} files={files} onChange={setFiles} />
+    <div className="mt-6 space-y-5">
+      <IdentityPhotos dict={dict} files={files} onChange={setFiles} wide />
       {failed ? <ErrorNote>{t.docsFailed}</ErrorNote> : null}
-      <PrimaryButton type="button" loading={sending} disabled={!hasAllDocs(files)} onClick={send}>{sending ? t.docsSending : t.docsSend}</PrimaryButton>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="sm:w-56">
+          <span className="block h-1.5 overflow-hidden rounded-full bg-fg/12">
+            <span className="block h-full rounded-full bg-volt transition-[width]" style={{ width: `${(added / IDENTITY_DOCS.length) * 100}%` }} />
+          </span>
+          <span className="mt-2 block text-xs font-semibold text-fg/60">{fill(t.docsCount, { n: added, total: IDENTITY_DOCS.length })}</span>
+        </div>
+        <PrimaryButton type="button" loading={sending} disabled={!hasAllDocs(files)} onClick={send} className="sm:w-auto sm:px-10">{sending ? t.docsSending : t.docsSend}</PrimaryButton>
+      </div>
     </div>
   );
 }

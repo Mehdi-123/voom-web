@@ -9,6 +9,7 @@ import { sb } from "@/lib/supabase-browser";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
+import PasswordInput from "./PasswordInput";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 import Turnstile from "./Turnstile";
 import { turnstileEnabled } from "@/lib/turnstile";
@@ -101,12 +102,12 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
       {step === 3 ? (
         <form onSubmit={save} className="space-y-7">
           <Field label={t.password}>
-            <TextInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+            <PasswordInput common={dict.dash.common} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
               {rules.map((r) => <li key={r.label} className={`text-sm ${r.ok ? "text-go" : "text-fg/45"}`}>{r.ok ? "✓" : "○"} {r.label}</li>)}
             </ul>
           </Field>
-          <Field label={t.confirmPassword} error={confirm && password !== confirm ? t.mismatch : undefined}><TextInput type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" /></Field>
+          <Field label={t.confirmPassword} error={confirm && password !== confirm ? t.mismatch : undefined}><PasswordInput common={dict.dash.common} value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" /></Field>
           {error ? <ErrorNote>{error}</ErrorNote> : null}
           <PrimaryButton type="submit" loading={loading} disabled={!isStrongPassword(password) || password !== confirm}>{t.savePassword}</PrimaryButton>
         </form>

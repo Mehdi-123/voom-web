@@ -1,5 +1,5 @@
 const dash = {
-  common: { loading: "Chargement…", save: "Enregistrer", saving: "Enregistrement…", saved: "Enregistré", cancel: "Annuler", back: "Retour", edit: "Modifier", delete: "Supprimer", error: "Une erreur est survenue. Réessayez.", retry: "Réessayer", signOutTitle: "Se déconnecter ?", signOutText: "Vous devrez vous reconnecter pour accéder à votre espace.", adminName: "Admin", signOut: "Se déconnecter", seeAll: "Tout voir", optional: "Facultatif", days: "{n} jours", day: "1 jour", themeLight: "Mode clair", themeDark: "Mode sombre", collapse: "Réduire le menu", expand: "Agrandir le menu", appearance: "Apparence", roleAgency: "Agence", roleAdmin: "Administrateur", roleCustomer: "Client", myProfile: "Mon profil" },
+  common: { loading: "Chargement…", save: "Enregistrer", saving: "Enregistrement…", saved: "Enregistré", cancel: "Annuler", back: "Retour", edit: "Modifier", delete: "Supprimer", error: "Une erreur est survenue. Réessayez.", retry: "Réessayer", signOutTitle: "Se déconnecter ?", signOutText: "Vous devrez vous reconnecter pour accéder à votre espace.", adminName: "Admin", signOut: "Se déconnecter", seeAll: "Tout voir", optional: "Facultatif", days: "{n} jours", day: "1 jour", themeLight: "Mode clair", themeDark: "Mode sombre", collapse: "Réduire le menu", expand: "Agrandir le menu", appearance: "Apparence", roleAgency: "Agence", roleAdmin: "Administrateur", roleCustomer: "Client", myProfile: "Mon profil", showPassword: "Afficher le mot de passe", hidePassword: "Masquer le mot de passe" },
   status: { pending: "En attente", confirmed: "Confirmée", active: "En cours", completed: "Terminée", cancelled: "Annulée", no_show: "Client absent", approved: "Approuvé", rejected: "Refusé" },
   nav: { overview: "Vue d'ensemble", bookings: "Réservations", fleet: "Mes voitures", profile: "Profil", review: "Vérifications", site: "Retour au site", menu: "Menu", earnings: "Revenus", notifications: "Notifications" },
   auth: {
@@ -83,6 +83,7 @@ const dash = {
     docsHint: "JPG ou PNG, 8 Mo maximum",
     docsSend: "Envoyer mes documents",
     docsSending: "Envoi…",
+    docsCount: "{n} sur {total} ajoutés",
     docsFailed: "L'envoi a échoué. Réessayez.",
     docsNeedAll: "Ajoutez les quatre photos pour les envoyer.",
     skip: "Passer cette étape",
