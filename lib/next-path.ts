@@ -6,7 +6,7 @@ import type { Locale } from "./i18n";
 const subscribe = () => () => {};
 
 /** A `next` address is only trusted when it stays inside the site for this language. */
-export function safeNext(lang: Locale, raw: string | null): string | null {
+function safeNext(lang: Locale, raw: string | null): string | null {
   if (!raw || !raw.startsWith(`/${lang}/`) || raw.startsWith("//") || raw.includes("\\")) return null;
   return raw;
 }

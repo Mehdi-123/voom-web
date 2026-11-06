@@ -113,6 +113,8 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
   const roleLabel = role === "admin" ? c.roleAdmin : role === "agency" ? c.roleAgency : c.roleCustomer;
   const row = "flex min-h-[3.25rem] items-center gap-3 rounded-2xl px-2 py-1.5";
   const rowIcon = "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-fg/10 text-fg/70";
+  // The menu is removed from under the pointer, so no pointer-leave arrives: close the rail along with it
+  const closeAccount = () => { setAccount(false); setHover(false); };
   const accountPanel = (
     <div className="space-y-1">
       <div className="mb-2 flex items-center gap-3 rounded-2xl bg-fg/5 p-3">
@@ -124,7 +126,7 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
         </div>
       </div>
       {role !== "admin" ? (
-        <Link href={`${base}/profile`} onClick={() => setAccount(false)} className={`${row} transition-colors hover:bg-fg/10`}>
+        <Link href={`${base}/profile`} onClick={closeAccount} className={`${row} transition-colors hover:bg-fg/10`}>
           <span className={rowIcon}><UserIcon className="h-[18px] w-[18px]" /></span>
           <span className="flex-1 font-semibold">{c.myProfile}</span>
           <span aria-hidden className="text-fg/35 rtl:rotate-180">→</span>
@@ -147,7 +149,7 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
         </div>
       </div>
       <div className="my-1 h-px bg-fg/10" />
-      <button type="button" onClick={() => { setAccount(false); setConfirming(true); }} className={`${row} w-full text-start font-semibold text-danger transition-colors hover:bg-danger/10`}>
+      <button type="button" onClick={() => { closeAccount(); setConfirming(true); }} className={`${row} w-full text-start font-semibold text-danger transition-colors hover:bg-danger/10`}>
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-danger/15"><LogoutIcon className="h-[18px] w-[18px]" /></span>
         {c.signOut}
       </button>

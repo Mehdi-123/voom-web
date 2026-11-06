@@ -12,6 +12,7 @@ import { CalendarIcon, CarIcon, CoinsIcon, GridIcon, PlusIcon } from "@/componen
 import AdminOverview from "@/components/portal/AdminOverview";
 import CustomerHome from "@/components/portal/CustomerHome";
 import { Empty, Initial, Loading, Stat, StatusBadge, shortDate } from "@/components/portal/dash-ui";
+import ReviewNotice from "@/components/portal/ReviewNotice";
 
 export default function DashboardHome() {
   const { role } = useAuth();
@@ -78,12 +79,7 @@ function AgencyOverview() {
         <Link href={`/${lang}/dashboard/fleet/new`} className="inline-flex items-center gap-2 on-volt rounded-full bg-volt px-6 py-3 font-bold text-white shadow-lg shadow-volt/30 transition-colors hover:bg-volt-soft"><PlusIcon className="h-5 w-5" /> {o.addCar}</Link>
       </div>
 
-      {agency.approval_status === "pending" ? (
-        <div className="mb-8 flex items-start gap-4 rounded-3xl border border-volt/40 bg-volt/10 p-5">
-          <span aria-hidden className="mt-1 h-3 w-3 shrink-0 rounded-full bg-warn" />
-          <p className="text-fg/85">{o.reviewBanner}</p>
-        </div>
-      ) : null}
+      {agency.approval_status === "pending" ? <ReviewNotice title={o.reviewTitle} text={o.reviewBanner} steps={o.reviewSteps} /> : null}
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-4">
         <Stat label={o.toHandle} value={pending.length} tone="accent" icon={<GridIcon className="h-[18px] w-[18px]" />} />

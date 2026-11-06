@@ -25,8 +25,9 @@ export const GridIcon = ({ className = "" }: { className?: string }) => (
 export const CalendarIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><rect x="3" y="5" width="18" height="16" rx="2.5" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
 );
+/** The car used across Voom: the app's Fleet tab icon. */
 export const CarIcon = ({ className = "" }: { className?: string }) => (
-  <svg {...base} className={className} aria-hidden><path d="M3 17v-4l2-5c.3-.8 1-1.2 1.8-1.2h10.4c.8 0 1.5.4 1.8 1.2l2 5v4" /><path d="M3 13h18M6 17v2M18 17v2" /><circle cx="7.5" cy="14.5" r=".6" fill="currentColor" /><circle cx="16.5" cy="14.5" r=".6" fill="currentColor" /></svg>
+  <svg {...base} className={className} aria-hidden><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" /></svg>
 );
 export const UserIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" /></svg>
@@ -93,4 +94,13 @@ export const MinusIcon = ({ className = "" }: { className?: string }) => (
 
 export const GlobeIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" /></svg>
+);
+
+/** A car key: the renter's side of sign-up, as in the app. */
+export const KeyIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg>
+);
+/** The car of the Fleet menu with a plus: the agency's side of sign-up, as in the app. */
+export const CarPlusIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" /><path d="M19 2.5v5M16.5 5h5" /></svg>
 );

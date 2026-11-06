@@ -62,7 +62,7 @@ export default function FleetList() {
             <div key={car.id} className="glass flex flex-col overflow-hidden rounded-3xl">
               <div className="relative aspect-[4/3] bg-fg/5">
                 {car.images?.[0] ? <Image src={car.images[0]} alt={`${car.make} ${car.model}`} fill sizes="(min-width: 1280px) 30vw, 50vw" className="object-cover" /> : <span className="absolute inset-0 flex items-center justify-center text-fg/20"><CarIcon className="h-16 w-16" /></span>}
-                <span className="absolute start-3 top-3 rounded-full bg-page shadow-md"><StatusBadge status={car.is_available ? "approved" : "cancelled"} label={car.is_available ? t.fleet.visible : t.fleet.hidden} /></span>
+                <span className="absolute start-3 top-3 flex rounded-full bg-page shadow-md"><StatusBadge status={car.is_available ? "approved" : "cancelled"} label={car.is_available ? t.fleet.visible : t.fleet.hidden} /></span>
               </div>
               <div className="flex flex-1 flex-col gap-4 p-5">
                 <div>

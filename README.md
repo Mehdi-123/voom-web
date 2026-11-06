@@ -9,9 +9,12 @@ It reads the same Supabase project as the Voom app and only shows what the datab
 | Address | What it is |
 | --- | --- |
 | `/fr`, `/ar`, `/en` | Home: search by city, cities, latest cars, how it works, FAQ |
-| `/{lang}/cities/{city}` | A city page with its cars (12 main cities, see `lib/cities.ts`) |
-| `/{lang}/cars/{id}` | One car, with price, specs and structured data for Google |
+| `/{lang}/cars` | All cars, filtered by dates, city (`?city=`), type and price |
+| `/{lang}/cars/{id}` | One car, with price, specs, booking and structured data for Google |
 | `/{lang}/agencies` | Page for agencies that want to join |
+| `/{lang}/terms` | Terms of use |
+| `/{lang}/login`, `/signup`, `/forgot` | Sign in, create an account (renter or agency), password reset |
+| `/{lang}/dashboard` | The signed-in space: agency fleet and bookings, renter bookings, admin reviews |
 | `/sitemap.xml`, `/robots.txt` | For search engines; every page lists its translations |
 
 An address without a language (`/`) is redirected to the visitor's language (`proxy.ts`).
@@ -29,7 +32,7 @@ npm run build && npm start   # production check
 
 - `dictionaries/` all the text, one file per language (`fr.ts` is the reference, the others must match its shape)
 - `lib/cities.ts` the cities, with their names in each language
-- `lib/cars.ts` reads cars from Supabase, cached for about an hour
+- `lib/cars.ts` reads cars from Supabase, refreshed every 30 seconds
 - `lib/site.ts` support email and phone, store links (leave empty until the app is published)
 - `components/` header, footer, car card, FAQ, etc.
 

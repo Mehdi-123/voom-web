@@ -134,6 +134,8 @@ const fr = {
     category: { economy: "Économique", comfort: "Confort", luxury: "Luxe", suv: "SUV", van: "Van" },
     transmission: { manual: "Manuelle", automatic: "Automatique" },
     fuel: { petrol: "Essence", diesel: "Diesel", electric: "Électrique", hybrid: "Hybride" },
+    categoryHint: { economy: "Petite et économique", comfort: "Berline pour les trajets faciles", luxury: "Élégante et haut de gamme", suv: "Haute, spacieuse, tous terrains", van: "Groupes et bagages" },
+    transmissionHint: { manual: "Levier de vitesses", automatic: "Il suffit de conduire" },
     options: {
       "GPS": "GPS", "USB charger": "Chargeur USB", "Bluetooth": "Bluetooth", "360° camera": "Caméra 360°",
       "Apple CarPlay / Android Auto": "Apple CarPlay / Android Auto", "Air conditioning": "Climatisation",

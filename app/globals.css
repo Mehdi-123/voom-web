@@ -45,7 +45,7 @@ button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
   --color-night: #ffffff;
   --color-volt-soft: #6a45d6;
   --color-go: #04946f;
-  --color-warn: #9a6700;
+  --color-warn: #d97706;
   --color-danger: #d23a1d;
   --color-info: #1f6fd1;
 }

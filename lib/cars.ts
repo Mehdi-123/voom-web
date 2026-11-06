@@ -21,10 +21,13 @@ export type Car = {
 
 const COLUMNS = "id, make, model, year, price_per_day, city, category, transmission, fuel, seats, images, features, rating, review_count, created_at";
 
-/** Available cars (newest first), optionally for one city. Refreshed about every hour. */
+// Cars are added and approved in the browser, so the server cannot be told when the list changes: it re-reads it often
+const FRESH = { stale: 30, revalidate: 30, expire: 600 };
+
+/** Available cars (newest first). Refreshed every half minute. */
 export async function getCars(options: { limit?: number } = {}): Promise<Car[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife(FRESH);
 
   let query = supabase.from("cars").select(COLUMNS).eq("is_available", true).order("created_at", { ascending: false });
   if (options.limit) query = query.limit(options.limit);
@@ -38,7 +41,7 @@ export async function getCars(options: { limit?: number } = {}): Promise<Car[]> 
 
 export async function getCar(id: string): Promise<Car | null> {
   "use cache";
-  cacheLife("hours");
+  cacheLife(FRESH);
 
   const { data } = await supabase.from("cars").select(COLUMNS).eq("id", id).maybeSingle();
   return (data as Car | null) ?? null;

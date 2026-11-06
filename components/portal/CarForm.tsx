@@ -9,14 +9,17 @@ import { resizeToJpeg } from "@/lib/image";
 import { fill, formatPrice } from "@/lib/i18n";
 import { CAR_OPTIONS, CATEGORIES, FUELS, SEATS, TRANSMISSIONS } from "@/lib/car-options";
 import type { CarRow } from "@/lib/portal-types";
-import { CarIcon, CheckIcon, ImageIcon, MinusIcon, PlusIcon } from "@/components/Icons";
+import { CarIcon, CheckIcon, ImageIcon, PlusIcon } from "@/components/Icons";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
 import { Loading, PageHeader } from "./dash-ui";
 import { ErrorNote, Field, GhostButton, PrimaryButton, TextInput } from "./ui";
+import { CategoryIcon, LineIcon } from "./CarFormIcons";
+import PhotoCropper from "./PhotoCropper";
 
 const MAX_PHOTOS = 8;
 const THIS_YEAR = new Date().getFullYear();
+const PRICE_STEP = 50;
 
 /** A photo already stored (url only) or one just chosen (file, shown from a local preview). */
 type Photo = { key: string; url: string; file?: File };
@@ -29,6 +32,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     </section>
   );
 }
+
+/** The round − / + button beside the price and the seats. */
+function StepButton({ label, onClick, disabled }: { label: "−" | "+"; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button type="button" onClick={onClick} disabled={disabled} aria-label={label} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.4rem] bg-volt/15 text-2xl font-semibold leading-none text-volt-soft transition-colors hover:bg-volt/25 disabled:cursor-not-allowed disabled:opacity-35">{label}</button>
+  );
+}
+
+/** A choice shown as a card: purple when picked. `tile` is the colour behind the picture, for the cut-outs of the car drawings. */
+const choice = (on: boolean) => `text-start transition-colors ${on ? "bg-volt text-white" : "bg-fg/5 text-fg hover:bg-fg/10"}`;
+const tileOf = (on: boolean) => ({ "--tile": on ? "var(--color-volt-soft)" : "var(--color-night)" }) as React.CSSProperties;
 
 /** Add a car, or edit one when the address has an id. Photos are shrunk in the browser, then stored publicly like the app's. */
 export default function CarForm() {
@@ -53,6 +67,9 @@ export default function CarForm() {
   const [features, setFeatures] = useState<string[]>([]);
   const [available, setAvailable] = useState(true);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  // Photos picked together wait here and are cropped one after the other
+  const [queue, setQueue] = useState<File[]>([]);
+  const [queueTotal, setQueueTotal] = useState(0);
   const [over, setOver] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +88,19 @@ export default function CarForm() {
     });
   }, [carId]);
 
+  // Pages stay alive, hidden, when you leave them, so a new-car form would still hold the last car typed.
+  // Leaving it (after saving, or by going elsewhere) empties it; this runs when the page is hidden.
+  useEffect(() => {
+    if (carId) return;
+    return () => {
+      setMake(""); setModel(""); setYear(String(THIS_YEAR)); setPrice("");
+      setCategory("economy"); setTransmission("manual"); setFuel("petrol"); setSeats(5);
+      setFeatures([]); setAvailable(true);
+      setPhotos((all) => { all.forEach((p) => { if (p.file) URL.revokeObjectURL(p.url); }); return []; });
+      setQueue([]); setQueueTotal(0); setError(null); setSaving(false);
+    };
+  }, [carId]);
+
   // Previews made from local files are released when the page closes
   useEffect(() => () => { photos.forEach((p) => { if (p.file) URL.revokeObjectURL(p.url); }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -81,10 +111,15 @@ export default function CarForm() {
   function addFiles(files: FileList | File[] | null) {
     if (!files) return;
     const room = MAX_PHOTOS - photos.length;
-    const next = Array.from(files).filter((file) => file.type.startsWith("image/")).slice(0, room)
-      .map((file) => ({ key: `${file.name}-${file.size}-${Math.random().toString(36).slice(2)}`, url: URL.createObjectURL(file), file }));
-    setPhotos((all) => [...all, ...next]);
+    const picked = Array.from(files).filter((file) => file.type.startsWith("image/")).slice(0, room);
+    if (picked.length) { setQueueTotal(picked.length); setQueue(picked); }
     if (fileInput.current) fileInput.current.value = "";
+  }
+  const nextInQueue = () => setQueue((q) => q.slice(1));
+  function addCropped(blob: Blob) {
+    const file = new File([blob], `photo-${Date.now()}.jpg`, { type: "image/jpeg" });
+    setPhotos((all) => [...all, { key: `${file.name}-${Math.random().toString(36).slice(2)}`, url: URL.createObjectURL(file), file }]);
+    nextInQueue();
   }
   function onDrop(e: DragEvent) { e.preventDefault(); setOver(false); addFiles(e.dataTransfer.files); }
   const remove = (key: string) => setPhotos((all) => all.filter((p) => p.key !== key));
@@ -122,10 +157,14 @@ export default function CarForm() {
   const toggle = (label: string) => setFeatures((list) => (list.includes(label) ? list.filter((x) => x !== label) : [...list, label]));
   const pill = (on: boolean) => `flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors ${on ? "border-volt bg-volt text-white" : "border-fg/15 text-fg/75 hover:bg-fg/10"}`;
   const priceNumber = parseFloat(price) || 0;
+  const seatIndex = Math.max(0, SEATS.indexOf(seats as (typeof SEATS)[number]));
   const title = [make.trim(), model.trim()].filter(Boolean).join(" ");
 
   return (
     <form onSubmit={save}>
+      {queue[0] ? (
+        <PhotoCropper key={queueTotal - queue.length} file={queue[0]} index={queueTotal - queue.length} total={queueTotal} labels={f.crop} cancelLabel={t.common.cancel} onDone={addCropped} onSkip={nextInQueue} onCancel={() => setQueue([])} />
+      ) : null}
       <Link href={`/${lang}/dashboard/fleet`} className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-fg/70 hover:text-fg"><span className="rtl:rotate-180">←</span> {t.nav.fleet}</Link>
       <PageHeader title={carId ? f.editTitle : f.newTitle} subtitle={agency.approval_status === "pending" ? f.reviewNote : undefined} />
 
@@ -175,38 +214,94 @@ export default function CarForm() {
               <Field label={f.make}><TextInput value={make} onChange={(e) => setMake(e.target.value)} placeholder={f.makePlaceholder} /></Field>
               <Field label={f.model}><TextInput value={model} onChange={(e) => setModel(e.target.value)} placeholder={f.modelPlaceholder} /></Field>
               <Field label={f.year}><TextInput type="number" inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value)} min={1990} max={THIS_YEAR + 1} /></Field>
-              <Field label={f.price}>
-                <div className="relative">
-                  <TextInput type="number" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} min={0} placeholder="350" className="pe-24 text-xl font-bold" />
-                  <span className="pointer-events-none absolute end-5 top-1/2 -translate-y-1/2 text-sm font-bold text-fg/50">MAD</span>
+            </div>
+
+            {/* The price, big, with − / + like in the app */}
+            <div className="relative mt-6 flex items-center gap-3 overflow-hidden rounded-3xl bg-[#13121f] p-4 text-white sm:p-5">
+              <span aria-hidden className="pointer-events-none absolute -end-12 -top-20 h-48 w-48 rounded-full border-[6px] border-volt/35" />
+              <span aria-hidden className="pointer-events-none absolute -end-28 -top-36 h-80 w-80 rounded-full border-[5px] border-volt/20" />
+              <StepButton label="−" disabled={priceNumber <= 0} onClick={() => setPrice(String(Math.max(priceNumber - PRICE_STEP, 0)))} />
+              <div className="relative min-w-0 flex-1 text-center">
+                <label htmlFor="car-price" className="block text-[10px] font-bold uppercase tracking-[0.11em] text-white/45">{f.price}</label>
+                <div className="flex items-end justify-center gap-1.5">
+                  <input
+                    id="car-price"
+                    inputMode="decimal"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, "").slice(0, 6))}
+                    placeholder="0"
+                    style={{ width: `${Math.max(price.length, 1) + 0.3}ch` }}
+                    className="font-display max-w-full bg-transparent text-center text-5xl font-extrabold leading-tight text-volt outline-none placeholder:text-white/25"
+                  />
+                  <span className="pb-3 text-sm font-semibold text-white/50">MAD</span>
                 </div>
-              </Field>
+              </div>
+              <StepButton label="+" onClick={() => setPrice(String(priceNumber + PRICE_STEP))} />
             </div>
           </Section>
 
           <Section title={f.specs}>
-            <div className="space-y-7">
+            <div className="space-y-8">
               <div>
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.category}</p>
-                <div className="flex flex-wrap gap-2">{CATEGORIES.map((c) => <button key={c} type="button" onClick={() => setCategory(c)} aria-pressed={category === c} className={pill(category === c)}>{labels.category[c]}</button>)}</div>
-              </div>
-              <div className="grid gap-7 sm:grid-cols-2">
-                <div>
-                  <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.transmission}</p>
-                  <div className="flex flex-wrap gap-2">{TRANSMISSIONS.map((c) => <button key={c} type="button" onClick={() => setTransmission(c)} aria-pressed={transmission === c} className={pill(transmission === c)}>{labels.transmission[c]}</button>)}</div>
+                <div className="-mx-6 flex gap-2.5 overflow-x-auto px-6 pb-1 no-scrollbar sm:-mx-8 sm:px-8">
+                  {CATEGORIES.map((c) => {
+                    const on = category === c;
+                    return (
+                      <button key={c} type="button" onClick={() => setCategory(c)} aria-pressed={on} className={`w-36 shrink-0 rounded-[1.25rem] p-3.5 ${choice(on)}`} style={tileOf(on)}>
+                        <span className={`flex h-[42px] w-16 items-center justify-center rounded-[0.875rem] ${on ? "bg-white/20" : "bg-volt/10"} ${on ? "text-white" : "text-volt"}`}><CategoryIcon name={c} className="h-[34px] w-11" /></span>
+                        <span className="mt-3 block text-[15px] font-bold">{labels.category[c]}</span>
+                        <span className={`mt-0.5 block text-[11px] leading-snug ${on ? "text-white/80" : "text-fg/55"}`}>{labels.categoryHint[c]}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-2">
                 <div>
                   <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.seats}</p>
-                  <div className="inline-flex items-center gap-1 rounded-full border border-fg/15 p-1">
-                    <button type="button" onClick={() => setSeats(SEATS[Math.max(0, SEATS.indexOf(seats as (typeof SEATS)[number]) - 1)])} aria-label="−" className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-fg/10"><MinusIcon className="h-4 w-4" /></button>
-                    <span className="w-10 text-center text-lg font-extrabold tabular-nums">{seats}</span>
-                    <button type="button" onClick={() => setSeats(SEATS[Math.min(SEATS.length - 1, SEATS.indexOf(seats as (typeof SEATS)[number]) + 1)])} aria-label="+" className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-fg/10"><PlusIcon className="h-4 w-4" /></button>
+                  <div className="flex items-center gap-3 rounded-3xl bg-fg/5 p-3">
+                    <StepButton label="−" disabled={seatIndex <= 0} onClick={() => setSeats(SEATS[seatIndex - 1])} />
+                    <div className="flex-1 text-center">
+                      <p className="font-display text-4xl font-extrabold leading-none tabular-nums">{seats}</p>
+                      <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-fg/55">{f.seats}</p>
+                    </div>
+                    <StepButton label="+" disabled={seatIndex >= SEATS.length - 1} onClick={() => setSeats(SEATS[seatIndex + 1])} />
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.transmission}</p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {TRANSMISSIONS.map((c) => {
+                      const on = transmission === c;
+                      return (
+                        <button key={c} type="button" onClick={() => setTransmission(c)} aria-pressed={on} className={`flex flex-col gap-3.5 rounded-[1.25rem] p-3.5 ${choice(on)} ${on ? "" : "text-fg"}`}>
+                          <LineIcon name={c} className={`h-[26px] w-[26px] ${on ? "text-white" : "text-volt"}`} />
+                          <span>
+                            <span className="block text-[15px] font-bold">{labels.transmission[c]}</span>
+                            <span className={`mt-px block text-[11px] ${on ? "text-white/80" : "text-fg/55"}`}>{labels.transmissionHint[c]}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
+
               <div>
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.fuel}</p>
-                <div className="flex flex-wrap gap-2">{FUELS.map((c) => <button key={c} type="button" onClick={() => setFuel(c)} aria-pressed={fuel === c} className={pill(fuel === c)}>{labels.fuel[c]}</button>)}</div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {FUELS.map((c) => {
+                    const on = fuel === c;
+                    return (
+                      <button key={c} type="button" onClick={() => setFuel(c)} aria-pressed={on} className={`flex flex-col items-center gap-2 rounded-[1.125rem] py-3.5 ${choice(on)}`}>
+                        <LineIcon name={c} className={`h-[22px] w-[22px] ${on ? "text-white" : "text-volt"}`} />
+                        <span className="text-xs font-bold">{labels.fuel[c]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </Section>

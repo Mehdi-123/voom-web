@@ -44,9 +44,11 @@ export default function ReviewDetail({ kind }: { kind: Kind }) {
       let d: Detail | null = null;
       if (kind === "agency") {
         const { data } = await sb.from("agencies").select("name, city, address, phone, email, registration_number, license_path, approval_status, rejection_reason, created_at").eq("id", id).maybeSingle();
+        // The owner's name stays with the account, so an admin-only function returns it
+        const { data: owner } = await sb.rpc("admin_agency_owner", { p_agency_id: id });
         if (data) d = {
           title: data.name, status: data.approval_status, reason: data.rejection_reason, submitted: data.created_at, bucket: "agency-documents",
-          rows: [[t.registration, data.registration_number], [t.city, data.city], [t.address, data.address], [t.phone, data.phone], [t.email, data.email]],
+          rows: [[t.owner, typeof owner === "string" ? owner : null], [t.registration, data.registration_number], [t.city, data.city], [t.address, data.address], [t.phone, data.phone], [t.email, data.email]],
           docs: data.license_path ? [{ label: t.business, path: data.license_path }] : [],
         };
       } else {

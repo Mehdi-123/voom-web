@@ -135,6 +135,8 @@ const en: Dictionary = {
     category: { economy: "Economy", comfort: "Comfort", luxury: "Luxury", suv: "SUV", van: "Van" },
     transmission: { manual: "Manual", automatic: "Automatic" },
     fuel: { petrol: "Petrol", diesel: "Diesel", electric: "Electric", hybrid: "Hybrid" },
+    categoryHint: { economy: "Small and cheap to run", comfort: "Sedan for easy trips", luxury: "Sleek and premium", suv: "Tall, roomy, any road", van: "Groups and luggage" },
+    transmissionHint: { manual: "Stick shift", automatic: "Just drive" },
     options: {
       "GPS": "GPS", "USB charger": "USB charger", "Bluetooth": "Bluetooth", "360° camera": "360° camera",
       "Apple CarPlay / Android Auto": "Apple CarPlay / Android Auto", "Air conditioning": "Air conditioning",

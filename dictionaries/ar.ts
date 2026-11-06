@@ -135,6 +135,8 @@ const ar: Dictionary = {
     category: { economy: "اقتصادية", comfort: "مريحة", luxury: "فاخرة", suv: "SUV", van: "فان" },
     transmission: { manual: "يدوي", automatic: "أوتوماتيك" },
     fuel: { petrol: "بنزين", diesel: "ديزل", electric: "كهربائية", hybrid: "هجينة" },
+    categoryHint: { economy: "صغيرة وموفّرة", comfort: "سيدان لرحلات مريحة", luxury: "أنيقة وراقية", suv: "مرتفعة وفسيحة لكل الطرق", van: "للمجموعات والأمتعة" },
+    transmissionHint: { manual: "ناقل يدوي", automatic: "قُد فقط" },
     options: {
       "GPS": "GPS", "USB charger": "شاحن USB", "Bluetooth": "Bluetooth", "360° camera": "كاميرا 360°",
       "Apple CarPlay / Android Auto": "Apple CarPlay / Android Auto", "Air conditioning": "مكيّف",

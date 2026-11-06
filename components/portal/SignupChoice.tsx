@@ -4,15 +4,15 @@ import Link from "next/link";
 import type { Dictionary } from "@/dictionaries/fr";
 import type { Locale } from "@/lib/i18n";
 import { useNextSuffix } from "@/lib/next-path";
-import { CarIcon, UserIcon } from "@/components/Icons";
+import { CarPlusIcon, KeyIcon } from "@/components/Icons";
 
 /** First step of sign-up: renter or agency. A `next` address (a car the person wanted to book) follows the renter. */
 export default function SignupChoice({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const t = dict.dash.auth;
   const nextSuffix = useNextSuffix(lang);
   const options = [
-    { href: `/${lang}/signup/customer${nextSuffix}`, icon: <UserIcon className="h-7 w-7" />, title: t.asCustomer, text: t.asCustomerText },
-    { href: `/${lang}/signup/agency`, icon: <CarIcon className="h-7 w-7" />, title: t.asAgency, text: t.asAgencyText },
+    { href: `/${lang}/signup/customer${nextSuffix}`, icon: <KeyIcon className="h-7 w-7" />, title: t.asCustomer, text: t.asCustomerText },
+    { href: `/${lang}/signup/agency`, icon: <CarPlusIcon className="h-7 w-7" />, title: t.asAgency, text: t.asAgencyText },
   ];
   return (
     <div className="space-y-7">
