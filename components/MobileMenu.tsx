@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Logo from "./Logo";
 import AccountLink from "./AccountLink";
@@ -38,7 +39,8 @@ export default function MobileMenu({ lang, links, loginLabel, accountLabel, menu
         <span className="h-0.5 w-2.5 self-end rounded-full bg-white ltr:me-3 rtl:ms-3" />
       </button>
 
-      {open ? (
+      {/* Drawn on the page itself: inside the header (which blurs what is behind it) "fixed" would only cover the header */}
+      {open ? createPortal(
         <div role="dialog" aria-modal="true" aria-label={menuLabel} className="menu-in night grain fixed inset-0 z-[70] flex flex-col overflow-y-auto px-5 pb-8 pt-4 text-white">
           <div className="flex items-center justify-between py-2.5 ps-3">
             <Link href={`/${lang}`} aria-label="Voom" onClick={close}><Logo tone="white" height={24} /></Link>
@@ -70,7 +72,8 @@ export default function MobileMenu({ lang, links, loginLabel, accountLabel, menu
             </div>
             <AccountLink lang={lang} loginLabel={loginLabel} accountLabel={accountLabel} onClick={close} className="flex h-14 items-center justify-center rounded-2xl bg-volt text-lg font-bold shadow-lg shadow-volt/30 active:bg-volt-soft" />
           </div>
-        </div>
+        </div>,
+        document.body,
       ) : null}
     </>
   );
