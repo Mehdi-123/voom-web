@@ -33,10 +33,13 @@ export default function MobileMenu({ lang, links, loginLabel, accountLabel, menu
         onClick={() => setOpen(true)}
         aria-label={menuLabel}
         aria-expanded={open}
-        className="flex h-10 w-10 shrink-0 flex-col items-center justify-center gap-[5px] rounded-full bg-white/10 transition-colors active:bg-white/20"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 transition-colors active:bg-white/20"
       >
-        <span className="h-0.5 w-4 rounded-full bg-white" />
-        <span className="h-0.5 w-2.5 self-end rounded-full bg-white ltr:me-3 rtl:ms-3" />
+        {/* Two bars ending on the same edge: the right in English and French, the left in Arabic */}
+        <span className="flex w-4 flex-col items-end gap-[5px]">
+          <span className="h-0.5 w-4 rounded-full bg-white" />
+          <span className="h-0.5 w-2.5 rounded-full bg-white" />
+        </span>
       </button>
 
       {/* Drawn on the page itself: inside the header (which blurs what is behind it) "fixed" would only cover the header */}
@@ -49,28 +52,28 @@ export default function MobileMenu({ lang, links, loginLabel, accountLabel, menu
             </button>
           </div>
 
-          <nav aria-label={menuLabel} className="mt-10 flex flex-col">
+          <nav aria-label={menuLabel} className="mt-6 flex flex-col">
             {links.map((l, i) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={close}
-                className="menu-item font-display flex items-center justify-between border-b border-white/10 py-6 text-5xl font-extrabold tracking-tight"
+                className="menu-item font-display flex items-center justify-between border-b border-white/10 py-4 text-3xl font-extrabold tracking-tight"
                 style={{ animationDelay: `${120 + i * 70}ms` }}
               >
                 {l.label}
-                <svg viewBox="0 0 24 24" className="h-7 w-7 text-volt-soft rtl:rotate-180" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-volt-soft rtl:rotate-180" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </Link>
             ))}
           </nav>
 
-          <div className="menu-item mt-auto flex flex-col gap-6 pt-12" style={{ animationDelay: `${120 + links.length * 70}ms` }}>
+          <div className="menu-item mt-auto flex flex-col gap-5 pt-10" style={{ animationDelay: `${120 + links.length * 70}ms` }}>
             <div className="flex justify-center">
               <Suspense fallback={<div className="h-9 w-28" />}>
                 <LanguageSwitcher current={lang} label={languageLabel} />
               </Suspense>
             </div>
-            <AccountLink lang={lang} loginLabel={loginLabel} accountLabel={accountLabel} onClick={close} className="flex h-14 items-center justify-center rounded-2xl bg-volt text-lg font-bold shadow-lg shadow-volt/30 active:bg-volt-soft" />
+            <AccountLink lang={lang} loginLabel={loginLabel} accountLabel={accountLabel} onClick={close} className="flex h-12 items-center justify-center rounded-2xl bg-volt text-base font-bold shadow-lg shadow-volt/30 active:bg-volt-soft" />
           </div>
         </div>,
         document.body,

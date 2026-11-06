@@ -6,6 +6,7 @@ import { LOCALES, directionOf, getDictionary, hasLocale } from "@/lib/i18n";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { alternatesFor } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
+import ScrollProgress from "@/components/ScrollProgress";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo", display: "swap" });
@@ -39,7 +40,7 @@ export default async function RootLayout({ children, params }: Props) {
   return (
     <html lang={lang} dir={directionOf(lang)} data-scroll-behavior="smooth" className={`${inter.variable} ${cairo.variable} ${bricolage.variable} ${righteous.variable}`}>
       <body className="flex min-h-screen flex-col">
-        <div className="scroll-progress" aria-hidden />
+        <ScrollProgress />
         <JsonLd
           data={{
             "@context": "https://schema.org",
