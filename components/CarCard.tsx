@@ -5,8 +5,8 @@ import { formatPrice, Locale } from "@/lib/i18n";
 import type { Car } from "@/lib/cars";
 import { localizedCityName } from "@/lib/cities";
 
-/** One car: a big photo, the name, the main specs and the price per day. White card, to stand out on dark pages. */
-export default function CarCard({ car, lang, dict, className = "", priority = false }: { car: Car; lang: Locale; dict: Dictionary; className?: string; priority?: boolean }) {
+/** One car: a big photo, the name, the main specs and the price per day. White card, to stand out on dark pages. `query` (like the chosen period) is carried to the car page. */
+export default function CarCard({ car, lang, dict, className = "", priority = false, query = "" }: { car: Car; lang: Locale; dict: Dictionary; className?: string; priority?: boolean; query?: string }) {
   const photo = car.images?.[0];
   const labels = dict.labels;
   const specs = [
@@ -17,7 +17,7 @@ export default function CarCard({ car, lang, dict, className = "", priority = fa
 
   return (
     <Link
-      href={`/${lang}/cars/${car.id}`}
+      href={`/${lang}/cars/${car.id}${query}`}
       className={`group flex flex-col overflow-hidden rounded-[2rem] bg-white text-ink shadow-xl shadow-black/10 transition-all duration-500 active:scale-[0.98] [@media(hover:hover)]:hover:-translate-y-2 [@media(hover:hover)]:hover:shadow-2xl [@media(hover:hover)]:hover:shadow-volt/30 ${className}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-paper">

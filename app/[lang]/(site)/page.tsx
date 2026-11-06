@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { hasLocale, getDictionary } from "@/lib/i18n";
+import { hasLocale, getDictionary, formatPrice } from "@/lib/i18n";
 import { CITIES } from "@/lib/cities";
 import { getCars } from "@/lib/cars";
 import CarCard from "@/components/CarCard";
@@ -28,7 +28,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
   const storyPhones = [
     { shot: "car", alt: dict.how.steps[0].title },
     { shot: "book-dates", alt: dict.how.steps[1].title },
-    { shot: "booking", alt: dict.mock.confirmed },
+    { shot: "booking", alt: dict.phone.confirmed },
   ];
 
   return (
@@ -59,13 +59,16 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           </div>
 
           <Reveal variant="side" delay={300} className="relative mx-auto w-full max-w-sm lg:max-w-none">
-            <div className="float [--r:4deg]"><AppPhone shot="home" alt={dict.mock.explore} priority /></div>
+            <div className="float [--r:4deg]"><AppPhone shot="home" alt={dict.phone.explore} priority /></div>
             <div className="glass float absolute start-0 top-24 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:-4deg] sm:-start-6 sm:block lg:-start-10" style={{ animationDelay: "-2s" }}>
-              <span className="text-go">✓</span> {dict.mock.chipConfirmed}
+              <span className="text-go">✓</span> {dict.phone.chipConfirmed}
             </div>
-            <div className="glass float absolute end-0 bottom-28 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:3deg] sm:-end-6 sm:block" style={{ animationDelay: "-4s" }}>
-              350 MAD <span className="font-normal text-white/60">{dict.mock.perDay}</span>
-            </div>
+            {/* The lowest real price among the cars on show; nothing when there are none */}
+            {cars.length > 0 ? (
+              <div className="glass float absolute end-0 bottom-28 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:3deg] sm:-end-6 sm:block" style={{ animationDelay: "-4s" }}>
+                <span className="font-normal text-white/60">{dict.phone.from}</span> {formatPrice(Math.min(...cars.map((c) => c.price_per_day)), lang)} <span className="font-normal text-white/60">{dict.phone.perDay}</span>
+              </div>
+            ) : null}
           </Reveal>
         </div>
       </section>
@@ -190,7 +193,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             <div className="mt-10"><StoreBadges dict={dict} /></div>
           </Reveal>
           <Reveal variant="side" className="flex justify-center">
-            <div className="float [--r:-3deg]"><AppPhone shot="browse" alt={dict.mock.explore} /></div>
+            <div className="float [--r:-3deg]"><AppPhone shot="browse" alt={dict.phone.explore} /></div>
           </Reveal>
         </div>
       </section>

@@ -186,7 +186,7 @@ const ar: Dictionary = {
     seeAll: "عرض كل السيارات",
   },
   footer: { tagline: "احجز. سُق. انطلق.", explore: "استكشف", contact: "اتصل بنا", rights: "جميع الحقوق محفوظة." },
-  mock: {"explore": "اعثر على سيارتك", "car1": "داسيا لوغان", "car2": "بيجو 208", "car3": "تويوتا C-HR", "perDay": "/ اليوم", "request": "إرسال الطلب", "dates": "12 – 15 نونبر", "days": "3 أيام", "total": "المجموع", "sent": "تم إرسال الطلب", "confirmed": "تم تأكيد الحجز", "verified": "وكالة موثّقة", "payOnSite": "الدفع في عين المكان", "pickup": "الاستلام غدًا، 10:00", "chipConfirmed": "مؤكَّد", "scrollHint": "مرّر"},
+  phone: {"explore": "اعثر على سيارتك", "perDay": "/ اليوم", "from": "ابتداءً من", "confirmed": "تم تأكيد الحجز", "chipConfirmed": "مؤكَّد"},
   dash,
   notFound: { title: "الصفحة غير موجودة", text: "هذه الصفحة غير موجودة أو تم نقلها.", home: "العودة إلى الرئيسية" },
 };

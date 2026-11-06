@@ -186,7 +186,7 @@ const en: Dictionary = {
     seeAll: "See all cars",
   },
   footer: { tagline: "Reserve. Drive. Go.", explore: "Explore", contact: "Contact", rights: "All rights reserved." },
-  mock: {"explore": "Find your car", "car1": "Dacia Logan", "car2": "Peugeot 208", "car3": "Toyota C-HR", "perDay": "/ day", "request": "Send request", "dates": "12 – 15 Nov", "days": "3 days", "total": "Total", "sent": "Request sent", "confirmed": "Booking confirmed", "verified": "Verified agency", "payOnSite": "Pay on site", "pickup": "Pickup tomorrow, 10:00", "chipConfirmed": "Confirmed", "scrollHint": "Scroll"},
+  phone: {"explore": "Find your car", "perDay": "/ day", "from": "From", "confirmed": "Booking confirmed", "chipConfirmed": "Confirmed"},
   dash,
   notFound: { title: "Page not found", text: "This page does not exist or has moved.", home: "Back to home" },
 };

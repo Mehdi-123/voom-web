@@ -197,7 +197,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {shown.map((car, i) => <CarCard key={car.id} car={car} lang={lang} dict={dict} priority={i < 3} className="h-full" />)}
+            {shown.map((car, i) => <CarCard key={car.id} car={car} lang={lang} dict={dict} priority={i < 3} query={validPeriod ? `?from=${f.from}&to=${f.to}` : ""} className="h-full" />)}
           </div>
         )}
       </div>

@@ -190,7 +190,7 @@ const fr = {
     contact: "Contact",
     rights: "Tous droits réservés.",
   },
-  mock: {"explore": "Trouvez votre voiture", "car1": "Dacia Logan", "car2": "Peugeot 208", "car3": "Toyota C-HR", "perDay": "/ jour", "request": "Envoyer la demande", "dates": "12 – 15 nov.", "days": "3 jours", "total": "Total", "sent": "Demande envoyée", "confirmed": "Réservation confirmée", "verified": "Agence vérifiée", "payOnSite": "Paiement sur place", "pickup": "Prise en charge demain, 10:00", "chipConfirmed": "Confirmée", "scrollHint": "Défilez"},
+  phone: {"explore": "Trouvez votre voiture", "perDay": "/ jour", "from": "À partir de", "confirmed": "Réservation confirmée", "chipConfirmed": "Confirmée"},
   dash,
   notFound: { title: "Page introuvable", text: "Cette page n'existe pas ou a été déplacée.", home: "Retour à l'accueil" },
 };
