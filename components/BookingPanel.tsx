@@ -9,7 +9,7 @@ import type { Dictionary } from "@/dictionaries/fr";
 import RangeCalendar from "./RangeCalendar";
 import { Spinner } from "./portal/ui";
 
-type Props = { carId: string; pricePerDay: number; lang: Locale; labels: Dictionary["book"] };
+type Props = { carId: string; pricePerDay: number; minDays: number; lang: Locale; labels: Dictionary["book"] };
 type Who = { kind: "guest" } | { kind: "agency" } | { kind: "customer"; identity: "none" | "pending" | "approved" | "rejected"; suspended: boolean };
 
 const SERVICE_FEE = 0.05;
@@ -46,7 +46,7 @@ async function loadBusyDays(carId: string): Promise<Set<string>> {
 }
 
 /** The booking card on a car page: dates, the price, and the request itself (or what is needed first: an account, verified documents). */
-export default function BookingPanel({ carId, pricePerDay, lang, labels: t }: Props) {
+export default function BookingPanel({ carId, pricePerDay, minDays, lang, labels: t }: Props) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [busy, setBusy] = useState<Set<string>>(new Set());
@@ -64,9 +64,9 @@ export default function BookingPanel({ carId, pricePerDay, lang, labels: t }: Pr
     const f = q.get("from"), e = q.get("to");
     /* eslint-disable react-hooks/set-state-in-effect */
     setMin(today);
-    if (f && e && DATE.test(f) && DATE.test(e) && f >= today && e > f) { setFrom(f); setTo(e); }
+    if (f && e && DATE.test(f) && DATE.test(e) && f >= today && e > f && Math.round((parse(e).getTime() - parse(f).getTime()) / DAY) >= minDays) { setFrom(f); setTo(e); }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, []);
+  }, [minDays]);
 
   useEffect(() => { loadBusyDays(carId).then(setBusy); }, [carId]);
 
@@ -98,6 +98,7 @@ export default function BookingPanel({ carId, pricePerDay, lang, labels: t }: Pr
 
   async function send() {
     if (!hasDates || who?.kind !== "customer") return;
+    if (days < minDays) { setError(fill(t.minRentalError, { n: minDays })); return; }
     setSending(true);
     setError(null);
     const { data: session } = await sb.auth.getSession();
@@ -120,7 +121,7 @@ export default function BookingPanel({ carId, pricePerDay, lang, labels: t }: Pr
     if (err || !data) {
       const m = err?.message ?? "";
       if (m.includes("IDENTITY_NOT_VERIFIED")) setWho({ kind: "customer", identity: "none", suspended: false });
-      else setError(m.includes("AGENCY_NOT_APPROVED") ? t.agencyUnavailable : /overlap|conflict|already/i.test(m) ? t.overlap : t.failed);
+      else setError(m.includes("MIN_RENTAL_DAYS") ? fill(t.minRentalError, { n: minDays }) : m.includes("AGENCY_NOT_APPROVED") ? t.agencyUnavailable : /overlap|conflict|already/i.test(m) ? t.overlap : t.failed);
       return;
     }
     setSent(data.id);
@@ -147,9 +148,10 @@ export default function BookingPanel({ carId, pricePerDay, lang, labels: t }: Pr
     <section className="rounded-[2rem] border border-line bg-white p-6 text-ink shadow-xl shadow-volt/10 sm:p-7">
       <h2 className="font-display text-2xl font-extrabold">{t.title}</h2>
       <p className="mt-1 text-sm text-muted">{t.minTwo}</p>
+      {minDays > 1 ? <p className="mt-1 text-sm font-semibold text-volt-mid">{fill(t.minRental, { n: minDays })}</p> : null}
 
       <div className="mt-5">
-        {min ? <RangeCalendar from={from} to={to} min={min} lang={lang} labels={calLabels} blocked={busy} onChange={(f, e) => { setFrom(f); setTo(e); setError(null); }} /> : <div className="h-[4.25rem] rounded-2xl border border-line bg-paper" />}
+        {min ? <RangeCalendar from={from} to={to} min={min} minNights={minDays} lang={lang} labels={calLabels} blocked={busy} onChange={(f, e) => { setFrom(f); setTo(e); setError(null); }} /> : <div className="h-[4.25rem] rounded-2xl border border-line bg-paper" />}
       </div>
 
       {hasDates ? (

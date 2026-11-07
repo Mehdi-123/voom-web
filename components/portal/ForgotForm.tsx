@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@/dictionaries/fr";
-import type { Locale } from "@/lib/i18n";
+import { fill, type Locale } from "@/lib/i18n";
 import { sb } from "@/lib/supabase-browser";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
@@ -13,6 +13,8 @@ import PasswordInput from "./PasswordInput";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 import Turnstile from "./Turnstile";
 import { turnstileEnabled } from "@/lib/turnstile";
+import { maskEmail } from "@/lib/mask-email";
+import { useCooldown } from "@/lib/use-cooldown";
 
 /** Password recovery: the email, the 6-digit code we send, then a new password. */
 export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Dictionary }) {
@@ -24,6 +26,7 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [wait, startWait] = useCooldown();
   const [error, setError] = useState<string | null>(null);
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRound, setCaptchaRound] = useState(0);
@@ -44,6 +47,7 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
     setCaptchaRound((n) => n + 1);
     if (!result?.ok) { setError(result?.error?.code === "captcha_failed" ? t.captchaFailed : authErrorMessage(dict, result?.error, t.sendFailed)); return; }
     setStep(2);
+    startWait();
   }
 
   async function check(e: FormEvent) {
@@ -67,7 +71,7 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
     router.replace(`/${lang}/dashboard`);
   }
 
-  const copy = step === 1 ? [t.forgotTitle, t.forgotSubtitle] : step === 2 ? [t.codeTitle, t.codeSubtitle.replace("{email}", cleanEmail)] : [t.newTitle, t.newSubtitle];
+  const copy = step === 1 ? [t.forgotTitle, t.forgotSubtitle] : step === 2 ? [t.codeTitle, t.codeSubtitle.replace("{email}", maskEmail(cleanEmail))] : [t.newTitle, t.newSubtitle];
   const rules = [
     { ok: PASSWORD_RULES.minLength(password), label: t.passwordRules.min },
     { ok: PASSWORD_RULES.uppercase(password), label: t.passwordRules.upper },
@@ -95,7 +99,7 @@ export default function ForgotForm({ lang, dict }: { lang: Locale; dict: Diction
           <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
           {error ? <ErrorNote>{error}</ErrorNote> : null}
           <PrimaryButton type="submit" loading={loading} disabled={digits.some((d) => !d)}>{t.verify}</PrimaryButton>
-          <button type="button" onClick={() => send()} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline">{t.resend}</button>
+          <button type="button" onClick={() => send()} disabled={wait > 0 || loading} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline disabled:cursor-not-allowed disabled:text-fg/40 disabled:no-underline">{wait > 0 ? fill(t.resendIn, { s: wait }) : t.resend}</button>
         </form>
       ) : null}
 

@@ -64,6 +64,8 @@ const ar: Dictionary = {
     to: "الإرجاع",
     clear: "مسح التواريخ",
     pickReturn: "اختر الآن يوم الإرجاع",
+    minRental: "الحد الأدنى للإيجار: {n} يوم",
+    minRentalError: "تُكرى هذه السيارة لمدة {n} يوم على الأقل.",
     day: "يوم واحد",
     days: "{n} أيام",
     priceOne: "{price} × يوم واحد",

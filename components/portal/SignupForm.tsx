@@ -7,10 +7,14 @@ import type { Dictionary } from "@/dictionaries/fr";
 import type { Locale } from "@/lib/i18n";
 import { sb } from "@/lib/supabase-browser";
 import { authErrorMessage } from "@/lib/auth-errors";
-import { MOROCCAN_CITIES } from "@/lib/moroccan-cities";
+import { cityOptions } from "@/lib/cities";
+import { maskEmail } from "@/lib/mask-email";
+import { useCooldown } from "@/lib/use-cooldown";
+import { fill } from "@/lib/i18n";
+import CityCombobox from "@/components/CityCombobox";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { formatPhone, isValidPhone } from "@/lib/phone";
-import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, SelectInput, TextInput } from "./ui";
+import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, TextInput } from "./ui";
 import PasswordInput from "./PasswordInput";
 import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
 import Turnstile from "./Turnstile";
@@ -44,6 +48,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
   const [accepted, setAccepted] = useState(false);
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [resent, setResent] = useState(false);
+  const [wait, startWait] = useCooldown();
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRound, setCaptchaRound] = useState(0);
 
@@ -113,6 +118,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
     if (result.exists) { setLoading(false); setFormError(t.exists); return; }
     setLoading(false);
     setPhase("code");
+    startWait();
   }
 
   async function verify(ev: FormEvent) {
@@ -127,9 +133,11 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
   }
 
   async function resend() {
+    if (wait > 0) return;
     const { error } = await sb.auth.signInWithOtp({ email: cleanEmail, options: { shouldCreateUser: false } });
     if (error) await sb.auth.resend({ type: "signup", email: cleanEmail });
     setResent(true);
+    startWait();
   }
 
   if (phase === "upload-failed") {
@@ -146,12 +154,13 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
       <form onSubmit={verify} className="space-y-8">
         <div>
           <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", cleanEmail)}</p>
+          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", maskEmail(cleanEmail))}</p>
         </div>
         <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
         {formError ? <ErrorNote>{formError}</ErrorNote> : null}
         <PrimaryButton type="submit" loading={loading} disabled={digits.some((d) => !d)}>{loading ? t.verifying : t.verify}</PrimaryButton>
-        <button type="button" onClick={resend} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline">{resent ? t.resent : t.resend}</button>
+        {resent && wait > 0 ? <p className="text-center text-sm font-semibold text-go">{t.resent}</p> : null}
+        <button type="button" onClick={resend} disabled={wait > 0} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline disabled:cursor-not-allowed disabled:text-fg/40 disabled:no-underline">{wait > 0 ? fill(t.resendIn, { s: wait }) : t.resend}</button>
       </form>
     );
   }
@@ -193,12 +202,11 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
 
       {step === 2 ? (
         <>
-          <Field label={t.city} error={errors.city}>
-            <SelectInput value={city} onChange={(e) => setCity(e.target.value)} className={errors.city ? "!border-danger" : ""}>
-              <option value="" className="bg-night">{t.cityPlaceholder}</option>
-              {MOROCCAN_CITIES.map((c) => <option key={c} value={c} className="bg-night">{c}</option>)}
-            </SelectInput>
-          </Field>
+          <div>
+            <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-fg/60">{t.city}</span>
+            <CityCombobox id="signup-city" options={cityOptions(lang, "name")} value={city} onChange={setCity} label={t.city} placeholder={t.cityPlaceholder} variant="auth" invalid={!!errors.city} />
+            {errors.city ? <span className="mt-2.5 block text-sm text-danger">{errors.city}</span> : null}
+          </div>
           <Field label={t.address} error={errors.address}><TextInput value={address} onChange={(e) => setAddress(e.target.value)} invalid={!!errors.address} autoComplete="street-address" /></Field>
         </>
       ) : null}

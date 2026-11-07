@@ -64,6 +64,8 @@ const en: Dictionary = {
     to: "Return",
     clear: "Clear dates",
     pickReturn: "Now choose the return day",
+    minRental: "Minimum rental: {n} days",
+    minRentalError: "This car is rented for at least {n} days.",
     day: "1 day",
     days: "{n} days",
     priceOne: "{price} × 1 day",

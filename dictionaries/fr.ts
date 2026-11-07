@@ -63,6 +63,8 @@ const fr = {
     to: "Retour",
     clear: "Effacer les dates",
     pickReturn: "Choisissez maintenant le jour de retour",
+    minRental: "Durée minimale : {n} jours",
+    minRentalError: "Cette voiture se loue au minimum {n} jours.",
     day: "1 jour",
     days: "{n} jours",
     priceOne: "{price} × 1 jour",

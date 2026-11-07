@@ -111,3 +111,6 @@ export const EyeIcon = ({ className = "" }: { className?: string }) => (
 export const EyeOffIcon = ({ className = "" }: { className?: string }) => (
   <svg {...base} className={className} aria-hidden><path d="M17.9 17.9A10.4 10.4 0 0112 19c-6.5 0-10-7-10-7a17.6 17.6 0 014.1-5M9.9 5.2A9.6 9.6 0 0112 5c6.5 0 10 7 10 7a17.7 17.7 0 01-2.2 3.2M14.1 14.1a3 3 0 01-4.2-4.2M3 3l18 18" /></svg>
 );
+export const HomeIcon = ({ className = "" }: { className?: string }) => (
+  <svg {...base} className={className} aria-hidden><path d="M3 11l9-8 9 8" /><path d="M5 10v10h5v-6h4v6h5V10" /></svg>
+);

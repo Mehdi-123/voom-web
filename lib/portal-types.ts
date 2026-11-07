@@ -31,6 +31,7 @@ export type CarRow = {
   transmission: string;
   fuel: string;
   seats: number;
+  min_rental_days?: number | null;
   images: string[] | null;
   features: string[] | null;
   is_available: boolean;

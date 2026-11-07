@@ -13,10 +13,10 @@ const parse = (s: string) => { const [y, m, d] = s.split("-").map(Number); retur
 
 /**
  * A two-click date range: first the pickup day, then the return day. Days between are soft circles, the two ends are solid,
- * like the calendar in the Voom app. Days before `min` cannot be picked.
+ * like the calendar in the Voom app. Days before `min` cannot be picked, nor a return day closer than `minNights` to the pickup.
  * With `blocked` (booked days) it becomes a booking calendar, with the app's rules: a rental has at least two days and cannot cross a blocked day.
  */
-export default function RangeCalendar({ from, to, min, lang, labels, blocked, defaultOpen = false, onChange }: { from: string; to: string; min: string; lang: Locale; labels: Labels; blocked?: Set<string>; defaultOpen?: boolean; onChange: (from: string, to: string) => void }) {
+export default function RangeCalendar({ from, to, min, minNights = 1, lang, labels, blocked, defaultOpen = false, onChange }: { from: string; to: string; min: string; minNights?: number; lang: Locale; labels: Labels; blocked?: Set<string>; defaultOpen?: boolean; onChange: (from: string, to: string) => void }) {
   const [open, setOpen] = useState(defaultOpen);
   const [view, setView] = useState(() => { const d = from ? parse(from) : parse(min); d.setDate(1); return d; });
   const locale = LOCALE[lang];
@@ -39,22 +39,24 @@ export default function RangeCalendar({ from, to, min, lang, labels, blocked, de
   const weekdays = Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(locale, { weekday: "narrow" }));
   const waitingReturn = !!from && !to;
 
-  const addDay = (key: string) => { const d = parse(key); d.setDate(d.getDate() + 1); return iso(d); };
+  const addDays = (key: string, n: number) => { const d = parse(key); d.setDate(d.getDate() + n); return iso(d); };
+  const addDay = (key: string) => addDays(key, 1);
   const free = (key: string) => key >= min && !blocked?.has(key);
-  const canStart = (key: string) => free(key) && (!blocked || free(addDay(key)));
+  // A pickup needs every day up to the earliest allowed return to be free
+  const canStart = (key: string) => free(key) && (!blocked || Array.from({ length: minNights }, (_, i) => free(addDays(key, i + 1))).every(Boolean));
   // The last day reachable from the pickup without crossing a blocked day
   let lastReturn = "";
   if (blocked && waitingReturn) { lastReturn = from; for (let i = 0; i < 730 && free(addDay(lastReturn)); i++) lastReturn = addDay(lastReturn); }
   const selectable = (key: string) => {
     if (!blocked) return key >= min;
-    if (waitingReturn && key > from) return free(key) && key <= lastReturn;
+    if (waitingReturn && key > from) return free(key) && key <= lastReturn && key >= addDays(from, minNights);
     return canStart(key);
   };
 
   function pick(day: Date) {
     const key = iso(day);
     if (!selectable(key)) return;
-    if (waitingReturn && (blocked ? key > from : key >= from)) { onChange(from, key); setOpen(false); return; }
+    if (waitingReturn && (blocked ? key >= addDays(from, minNights) : key >= from)) { onChange(from, key); setOpen(false); return; }
     onChange(key, ""); // a new pickup (also when the day chosen is before the current one)
   }
 

@@ -12,6 +12,9 @@ import { emptyDocs, hasAllDocs, uploadIdentity, type DocFiles } from "@/lib/iden
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { formatPhone, isValidPhone } from "@/lib/phone";
 import { turnstileEnabled } from "@/lib/turnstile";
+import { maskEmail } from "@/lib/mask-email";
+import { useCooldown } from "@/lib/use-cooldown";
+import { fill } from "@/lib/i18n";
 import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, TextInput } from "./ui";
 import PasswordInput from "./PasswordInput";
 import { useAuth } from "./AuthProvider";
@@ -45,10 +48,13 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
   const [accepted, setAccepted] = useState(false);
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [resent, setResent] = useState(false);
+  const [wait, startWait] = useCooldown();
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRound, setCaptchaRound] = useState(0);
 
   const cleanEmail = email.trim().toLowerCase();
+  const someDocs = Object.values(docs).some(Boolean);
+  const allDocs = hasAllDocs(docs);
   const mismatch = confirm && password !== confirm ? t.mismatch : undefined;
 
   function validate(): boolean {
@@ -86,6 +92,7 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
     }
     if (result.exists) { setFormError(t.exists); return; }
     setCoding(true);
+    startWait();
   }
 
   async function verify(ev: FormEvent) {
@@ -105,9 +112,11 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
   }
 
   async function resend() {
+    if (wait > 0) return;
     const { error } = await sb.auth.signInWithOtp({ email: cleanEmail, options: { shouldCreateUser: false } });
     if (error) await sb.auth.resend({ type: "signup", email: cleanEmail });
     setResent(true);
+    startWait();
   }
 
   if (coding) {
@@ -115,12 +124,13 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
       <form onSubmit={verify} className="space-y-8">
         <div>
           <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", cleanEmail)}</p>
+          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", maskEmail(cleanEmail))}</p>
         </div>
         <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
         {formError ? <ErrorNote>{formError}</ErrorNote> : null}
         <PrimaryButton type="submit" loading={loading} disabled={digits.some((d) => !d)}>{loading ? t.verifying : t.verify}</PrimaryButton>
-        <button type="button" onClick={resend} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline">{resent ? t.resent : t.resend}</button>
+        {resent && wait > 0 ? <p className="text-center text-sm font-semibold text-go">{t.resent}</p> : null}
+        <button type="button" onClick={resend} disabled={wait > 0} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline disabled:cursor-not-allowed disabled:text-fg/40 disabled:no-underline">{wait > 0 ? fill(t.resendIn, { s: wait }) : t.resend}</button>
       </form>
     );
   }
@@ -164,6 +174,7 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
             <p className="mt-1.5 text-sm leading-relaxed text-fg/60">{t.docsText}</p>
           </div>
           <IdentityPhotos dict={dict} files={docs} onChange={setDocs} />
+          {someDocs && !allDocs ? <p className="text-sm font-semibold text-warn">{t.docsAllOrNone}</p> : null}
         </>
       ) : (
         <>
@@ -195,8 +206,8 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
 
       <div className="flex gap-3 pt-3">
         {step > 1 ? <GhostButton type="button" onClick={() => { setErrors({}); setStep((n) => n - 1); }}>{dict.dash.common.back}</GhostButton> : null}
-        <PrimaryButton type="submit" loading={loading} disabled={step === 3 && (!accepted || !isStrongPassword(password) || password !== confirm || (turnstileEnabled && !captcha))}>
-          {step === 3 ? (loading ? t.creating : t.create) : step === 2 && !Object.values(docs).some(Boolean) ? t.skip : t.next}
+        <PrimaryButton type="submit" loading={loading} disabled={(step === 2 && someDocs && !allDocs) || (step === 3 && (!accepted || !isStrongPassword(password) || password !== confirm || (turnstileEnabled && !captcha)))}>
+          {step === 3 ? (loading ? t.creating : t.create) : step === 2 && !someDocs ? t.skip : t.next}
         </PrimaryButton>
       </div>
       <p className="pt-2 text-center text-sm leading-relaxed text-fg/60">

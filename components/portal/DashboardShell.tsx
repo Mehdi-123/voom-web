@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n";
 import Image from "next/image";
 import Logo from "@/components/Logo";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { BellIcon, CalendarIcon, CarIcon, ChevronDownIcon, CoinsIcon, GlobeIcon, GridIcon, LogoutIcon, MoonIcon, ShieldIcon, SunIcon, UserIcon } from "@/components/Icons";
+import { BellIcon, CalendarIcon, CarIcon, ChevronDownIcon, CoinsIcon, GlobeIcon, GridIcon, HomeIcon, LogoutIcon, MoonIcon, ShieldIcon, SunIcon, UserIcon } from "@/components/Icons";
 import { useAuth } from "./AuthProvider";
 import { DashProvider } from "./DashContext";
 import { Initial, Loading } from "./dash-ui";
@@ -65,13 +65,21 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
   // A rejected agency is stopped; a pending one can already work (its cars stay hidden)
   if (role === "agency" && agency?.approval_status === "rejected") {
     return (
-      <div className={`${shell} night flex flex-col items-center justify-center px-5 text-center`}>
-        <h1 className="font-display text-4xl font-extrabold">{dict.dash.overview.rejectedTitle}</h1>
-        <p className="mt-3 max-w-md text-fg/60">{dict.dash.overview.rejectedText}</p>
-        {agency.rejection_reason ? (
-          <p className="glass mt-6 max-w-md rounded-2xl p-5 text-start"><span className="block text-xs font-bold uppercase tracking-wider text-fg/50">{dict.dash.overview.reason}</span>{agency.rejection_reason}</p>
-        ) : null}
-        <div className="mt-8 w-56"><PrimaryButton type="button" onClick={leave}>{c.signOut}</PrimaryButton></div>
+      <div className={`${shell} night flex items-center justify-center px-5 py-10`}>
+        <div className="w-full max-w-md">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-danger/15 text-danger">
+            <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </span>
+          <h1 className="font-display mt-5 text-balance text-3xl font-extrabold tracking-tight sm:text-4xl">{dict.dash.overview.rejectedTitle}</h1>
+          <p className="mt-3 leading-relaxed text-fg/65">{dict.dash.overview.rejectedText}</p>
+          {agency.rejection_reason ? (
+            <section className="mt-7 rounded-3xl border border-danger/30 bg-danger/10 p-5 sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-danger">{dict.dash.overview.reason}</p>
+              <p className="mt-2 text-lg leading-relaxed [overflow-wrap:anywhere]">{agency.rejection_reason}</p>
+            </section>
+          ) : null}
+          <div className="mt-8"><PrimaryButton type="button" onClick={leave}>{c.signOut}</PrimaryButton></div>
+        </div>
       </div>
     );
   }
@@ -125,6 +133,11 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
           <span className="mt-1.5 inline-block rounded-full bg-volt/20 px-2.5 py-0.5 text-[11px] font-bold text-volt-soft">{roleLabel}</span>
         </div>
       </div>
+      <Link href={`/${lang}`} onClick={closeAccount} className={`${row} transition-colors hover:bg-fg/10 lg:hidden`}>
+        <span className={rowIcon}><HomeIcon className="h-[18px] w-[18px]" /></span>
+        <span className="flex-1 font-semibold">{dict.dash.nav.site}</span>
+        <span aria-hidden className="text-fg/35 rtl:rotate-180">→</span>
+      </Link>
       {role !== "admin" ? (
         <Link href={`${base}/profile`} onClick={closeAccount} className={`${row} transition-colors hover:bg-fg/10`}>
           <span className={rowIcon}><UserIcon className="h-[18px] w-[18px]" /></span>
@@ -188,19 +201,27 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
               </nav>
             </div>
 
-            {/* The account: one calm button, everything else opens from it */}
-            <button type="button" onClick={() => setAccount((o) => !o)} aria-expanded={account} title={accountName ?? undefined} className={`flex w-full items-center gap-3 rounded-2xl border border-fg/10 p-2 transition-colors hover:bg-fg/10 ${shrunk ? "justify-center" : ""} ${account ? "bg-fg/10" : ""}`}>
-              {avatar}
-              {shrunk ? null : (
-                <>
-                  <span className="min-w-0 flex-1 text-start">
-                    <span className="block truncate font-bold">{accountName}</span>
-                    <span className="block truncate text-xs text-fg/50">{user.email}</span>
-                  </span>
-                  <ChevronDownIcon className={`h-4 w-4 shrink-0 text-fg/50 transition-transform ${account ? "" : "rotate-180"}`} />
-                </>
-              )}
-            </button>
+            <div className="space-y-2">
+              {/* The website, one step away from every kind of account */}
+              <Link href={`/${lang}`} title={dict.dash.nav.site} aria-label={dict.dash.nav.site} onClick={() => setHover(false)} className={`flex h-12 items-center gap-3 rounded-2xl font-semibold text-fg/65 transition-colors hover:bg-fg/10 hover:text-fg ${shrunk ? "justify-center" : "px-4"}`}>
+                <HomeIcon className="h-5 w-5 shrink-0" />
+                {shrunk ? null : <span className="min-w-0 flex-1 truncate">{dict.dash.nav.site}</span>}
+              </Link>
+
+  {/* The account: one calm button, everything else opens from it */}
+              <button type="button" onClick={() => setAccount((o) => !o)} aria-expanded={account} title={accountName ?? undefined} className={`flex w-full items-center gap-3 rounded-2xl border border-fg/10 p-2 transition-colors hover:bg-fg/10 ${shrunk ? "justify-center" : ""} ${account ? "bg-fg/10" : ""}`}>
+                {avatar}
+                {shrunk ? null : (
+                  <>
+                    <span className="min-w-0 flex-1 text-start">
+                      <span className="block truncate font-bold">{accountName}</span>
+                      <span className="block truncate text-xs text-fg/50">{user.email}</span>
+                    </span>
+                    <ChevronDownIcon className={`h-4 w-4 shrink-0 text-fg/50 transition-transform ${account ? "" : "rotate-180"}`} />
+                  </>
+                )}
+              </button>
+            </div>
           </aside>
 
           {account ? (

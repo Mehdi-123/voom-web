@@ -50,6 +50,7 @@ export default function AgencyProfile() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !user || !agency) return;
+    if (!["image/jpeg", "image/png"].includes(file.type)) { setLogoError(t.auth.fileType); return; }
     setLogoBusy(true);
     setLogoError(null);
     try {

@@ -52,6 +52,7 @@ export default function MyProfile() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !user) return;
+    if (!["image/jpeg", "image/png"].includes(file.type)) { setPhotoError(t.auth.fileType); return; }
     setPhotoBusy(true);
     setPhotoError(null);
     try {

@@ -12,22 +12,26 @@ type Props = {
   label: string;
   /** Adds a first choice that clears the city. */
   allLabel?: string;
-  /** "hero" is the big homepage search field; "field" is a regular form field. The list looks the same in both. */
-  variant: "hero" | "field";
+  /** Shown while nothing is chosen, without being a choice itself (a required field). */
+  placeholder?: string;
+  /** "hero" is the big homepage search field; "field" a form field on the light site; "auth" a form field on the dark sign-up card. The list looks the same in all. */
+  variant: "hero" | "field" | "auth";
   id?: string;
+  invalid?: boolean;
 };
 
 /** A styled city list (not the browser's own menu), with arrow keys, type-ahead, and a click outside to close. */
-export default function CityCombobox({ options, value, onChange, label, allLabel, variant, id }: Props) {
+export default function CityCombobox({ options, value, onChange, label, allLabel, placeholder, variant, id, invalid }: Props) {
   const listId = useId();
   const box = useRef<HTMLDivElement>(null);
   const typed = useRef({ text: "", at: 0 });
   const items = allLabel ? [{ key: "", label: allLabel }, ...options] : options;
-  const selected = Math.max(0, items.findIndex((o) => o.key === value));
+  const found = items.findIndex((o) => o.key === value);
+  const selected = Math.max(0, found);
   const [active, setActive] = useState(selected);
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
-  const current = items[selected];
+  const current = found < 0 && placeholder ? { key: "", label: placeholder } : items[selected];
 
   useEffect(() => {
     if (!open) return;
@@ -70,7 +74,9 @@ export default function CityCombobox({ options, value, onChange, label, allLabel
 
   const trigger = variant === "hero"
     ? "flex h-14 w-full items-center gap-3 rounded-full px-5 text-start transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-volt"
-    : "flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 text-start text-base text-ink outline-none transition-colors hover:border-volt/50 focus-visible:border-volt";
+    : variant === "auth"
+      ? `flex h-14 w-full items-center justify-between gap-3 rounded-2xl border bg-fg/5 px-5 text-start text-base outline-none transition-colors focus-visible:border-volt focus-visible:bg-fg/10 ${invalid ? "border-danger" : open ? "border-volt" : "border-fg/15"} ${value ? "text-fg" : "text-fg/35"}`
+      : "flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 text-start text-base text-ink outline-none transition-colors hover:border-volt/50 focus-visible:border-volt";
 
   return (
     <div ref={box} className="relative flex-1">
@@ -97,8 +103,8 @@ export default function CityCombobox({ options, value, onChange, label, allLabel
           </>
         ) : (
           <>
-            <span className={`min-w-0 flex-1 truncate ${value ? "font-semibold" : ""}`}>{current.label}</span>
-            <ChevronDownIcon className={`h-5 w-5 shrink-0 text-muted transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
+            <span className={`min-w-0 flex-1 truncate ${value && variant !== "auth" ? "font-semibold" : ""}`}>{current.label}</span>
+            <ChevronDownIcon className={`h-5 w-5 shrink-0 transition-transform duration-300 ${variant === "auth" ? "text-fg/50" : "text-muted"} ${open ? "rotate-180" : ""}`} />
           </>
         )}
       </button>
@@ -108,20 +114,20 @@ export default function CityCombobox({ options, value, onChange, label, allLabel
           id={listId}
           role="listbox"
           aria-label={label}
-          className={`menu-in absolute inset-x-0 z-30 ${up ? "bottom-[calc(100%+0.75rem)]" : "top-[calc(100%+0.75rem)]"} max-h-72 overflow-y-auto rounded-3xl border border-white/12 bg-night/60 p-2 text-white shadow-2xl shadow-black/50 backdrop-blur-2xl`}
+          className={`menu-in absolute inset-x-0 z-30 ${up ? "bottom-[calc(100%+0.75rem)]" : "top-[calc(100%+0.75rem)]"} max-h-72 overflow-y-auto rounded-3xl border border-white/12 p-2 text-white shadow-2xl shadow-black/50 ${variant === "auth" ? "bg-night" : "bg-night/60 backdrop-blur-2xl"}`}
         >
           {items.map((o, i) => (
             <li
               key={o.key || "all"}
               id={`${listId}-${i}`}
               role="option"
-              aria-selected={i === selected}
+              aria-selected={i === found}
               onPointerEnter={() => setActive(i)}
               onClick={() => choose(i)}
-              className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-base font-semibold transition-colors ${i === active ? "bg-white/10" : ""} ${i === selected ? "text-volt-soft" : "text-white"}`}
+              className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 text-base font-semibold transition-colors ${i === active ? "bg-white/10" : ""} ${i === found ? "text-volt-soft" : "text-white"}`}
             >
               {o.label}
-              {i === selected ? <CheckIcon className="h-4 w-4" /> : null}
+              {i === found ? <CheckIcon className="h-4 w-4" /> : null}
             </li>
           ))}
         </ul>

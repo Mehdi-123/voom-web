@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fill } from "@/lib/i18n";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, ExpandIcon } from "./Icons";
@@ -131,7 +132,8 @@ export default function CarGallery({ images, name, labels }: { images: string[];
         </div>
       ) : null}
 
-      {viewer ? (
+      {/* In the page body, so nothing on the car page (the sticky gallery column, the booking card) can paint over it */}
+      {viewer ? createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -163,7 +165,8 @@ export default function CarGallery({ images, name, labels }: { images: string[];
             ) : null}
           </div>
           <div className="h-4" />
-        </div>
+        </div>,
+        document.body,
       ) : null}
     </div>
   );

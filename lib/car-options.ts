@@ -9,3 +9,5 @@ export const CATEGORIES = ["economy", "comfort", "luxury", "suv", "van"] as cons
 export const TRANSMISSIONS = ["manual", "automatic"] as const;
 export const FUELS = ["petrol", "diesel", "electric", "hybrid"] as const;
 export const SEATS = [2, 4, 5, 7, 9] as const;
+/** The longest minimum rental an agency can ask for, in days (the database enforces the same range). */
+export const MAX_MIN_RENTAL_DAYS = 30;

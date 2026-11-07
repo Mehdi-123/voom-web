@@ -86,7 +86,7 @@ export default function FleetList() {
                   <div className="space-y-3">
                     <p className="text-sm font-semibold">{t.fleet.deleteConfirm}</p>
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => remove(car)} className="h-11 flex-1 rounded-xl bg-[#ff5c3a] font-bold">{t.bookings.yes}</button>
+                      <button type="button" onClick={() => remove(car)} className="h-11 flex-1 rounded-xl bg-[#ff5c3a] font-bold text-white">{t.bookings.yes}</button>
                       <GhostButton type="button" onClick={() => setAsking(null)} className="!h-11 flex-1">{t.bookings.no}</GhostButton>
                     </div>
                   </div>

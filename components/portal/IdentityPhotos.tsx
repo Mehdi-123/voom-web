@@ -6,15 +6,22 @@ import { IDENTITY_DOCS, MAX_PHOTO, type DocFiles, type DocKey } from "@/lib/iden
 import { CameraIcon } from "@/components/Icons";
 
 /** One photo slot: shows the chosen picture, or an invitation to pick one. */
-function Slot({ label, url, error, onPick }: { label: string; url?: string; error?: string; onPick: (file: File | null) => void }) {
+function Slot({ label, url, error, removeLabel, onPick }: { label: string; url?: string; error?: string; removeLabel: string; onPick: (file: File | null) => void }) {
   return (
     <div>
-      <label className={`group relative flex aspect-[1.6] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 text-center transition-colors focus-within:ring-2 focus-within:ring-volt/60 ${error ? "border-danger" : url ? "border-volt/60" : "border-dashed border-fg/20 bg-fg/[0.03] hover:border-volt/50 hover:bg-volt/5"}`}>
-        <input type="file" accept="image/jpeg,image/png" className="sr-only" onChange={(e) => { onPick(e.target.files?.[0] ?? null); e.target.value = ""; }} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {url ? <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <span className="flex h-10 w-10 items-center justify-center rounded-full bg-volt/12 text-volt-soft"><CameraIcon className="h-5 w-5" /></span>}
-        {url ? <span className="absolute inset-x-0 bottom-0 bg-black/55 px-2 py-1.5 text-xs font-semibold text-white">{label}</span> : <span className="px-3 text-xs font-semibold text-fg/70">{label}</span>}
-      </label>
+      <div className="relative">
+        <label className={`group relative flex aspect-[1.6] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border-2 text-center transition-colors focus-within:ring-2 focus-within:ring-volt/60 ${error ? "border-danger" : url ? "border-volt/60" : "border-dashed border-fg/20 bg-fg/[0.03] hover:border-volt/50 hover:bg-volt/5"}`}>
+          <input type="file" accept="image/jpeg,image/png" className="sr-only" onChange={(e) => { onPick(e.target.files?.[0] ?? null); e.target.value = ""; }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {url ? <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <span className="flex h-10 w-10 items-center justify-center rounded-full bg-volt/12 text-volt-soft"><CameraIcon className="h-5 w-5" /></span>}
+          {url ? <span className="absolute inset-x-0 bottom-0 bg-black/55 px-2 py-1.5 text-xs font-semibold text-white">{label}</span> : <span className="px-3 text-xs font-semibold text-fg/70">{label}</span>}
+        </label>
+        {url ? (
+          <button type="button" onClick={() => onPick(null)} aria-label={`${removeLabel}: ${label}`} title={removeLabel} className="absolute end-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-volt">
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        ) : null}
+      </div>
       {error ? <span className="mt-1.5 block text-xs text-danger">{error}</span> : null}
     </div>
   );
@@ -44,7 +51,7 @@ export default function IdentityPhotos({ dict, files, onChange, wide = false }: 
   return (
     <div>
       <div className={`grid grid-cols-2 gap-3 ${wide ? "lg:grid-cols-4" : ""}`}>
-        {IDENTITY_DOCS.map((d) => <Slot key={d.key} label={labels[d.key]} url={previews[d.key]} error={errors[d.key]} onPick={(f) => pick(d.key, f)} />)}
+        {IDENTITY_DOCS.map((d) => <Slot key={d.key} label={labels[d.key]} url={previews[d.key]} error={errors[d.key]} removeLabel={t.removePhoto} onPick={(f) => pick(d.key, f)} />)}
       </div>
       <p className="mt-2.5 text-xs text-fg/45">{t.docsHint}</p>
     </div>

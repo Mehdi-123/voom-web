@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dictionary } from "@/dictionaries/fr";
 import { fill, formatPrice, type Locale } from "@/lib/i18n";
 import type { Car } from "@/lib/cars";
@@ -18,6 +18,9 @@ const EMPTY: Filters = { q: "", city: "", category: "", transmission: "", fuel: 
 /** A car's city as the filter knows it: the city's slug, or the stored name for a city without a page. */
 const cityKey = (name: string) => citySlugFor(name) ?? name;
 
+/** Where the top of the results stops under the fixed header when they are scrolled into view, in pixels. */
+const RESULTS_GAP = 112;
+
 const todayIso = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
 
 /** Every car with its filters: period (free on these days), city, type, gearbox, fuel, seats, price, and a sort. The choices live in the address, so a search can be shared. */
@@ -30,6 +33,8 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
   const [periodFailed, setPeriodFailed] = useState(false);
   const [minDate] = useState(todayIso);
   const [loadedFromUrl, setLoadedFromUrl] = useState(false);
+  const results = useRef<HTMLDivElement>(null);
+  const filtersRead = useRef(false);
 
   const prices = cars.map((c) => c.price_per_day);
   const ceiling = Math.max(100, ...prices);
@@ -64,6 +69,19 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
       if (target === `${window.location.search}` || (!qs && !window.location.search)) return;
       try { window.history.replaceState(null, "", target); } catch { /* the address is only a convenience */ }
     }, 450);
+    return () => clearTimeout(timer);
+  }, [f, loadedFromUrl]);
+
+  // After a filter changes, the top of the results comes back into view (the filters may be far above or below it)
+  useEffect(() => {
+    if (!loadedFromUrl) return;
+    if (!filtersRead.current) { filtersRead.current = true; return; } // the filters read from the address are not a change
+    const timer = setTimeout(() => {
+      const top = results.current?.getBoundingClientRect().top;
+      if (top === undefined || Math.abs(top - RESULTS_GAP) < 8) return;
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: window.scrollY + top - RESULTS_GAP, behavior: calm ? "auto" : "smooth" });
+    }, 250);
     return () => clearTimeout(timer);
   }, [f, loadedFromUrl]);
 
@@ -177,7 +195,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
 
       <aside className={`${open ? "block" : "hidden"} mb-8 lg:sticky lg:top-28 lg:mb-0 lg:block`}>{panel}</aside>
 
-      <div>
+      <div ref={results}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <p className="font-display text-xl font-extrabold">{checking ? t.checking : count}</p>
           <input type="search" value={f.q} onChange={(e) => set("q", e.target.value)} placeholder={t.search} aria-label={t.search} className={`${input} hidden max-w-xs lg:block`} />

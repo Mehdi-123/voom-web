@@ -7,9 +7,9 @@ import { useParams, useRouter } from "next/navigation";
 import { sb } from "@/lib/supabase-browser";
 import { resizeToJpeg } from "@/lib/image";
 import { fill, formatPrice } from "@/lib/i18n";
-import { CAR_OPTIONS, CATEGORIES, FUELS, SEATS, TRANSMISSIONS } from "@/lib/car-options";
+import { CAR_OPTIONS, CATEGORIES, FUELS, MAX_MIN_RENTAL_DAYS, SEATS, TRANSMISSIONS } from "@/lib/car-options";
 import type { CarRow } from "@/lib/portal-types";
-import { CarIcon, CheckIcon, ImageIcon, PlusIcon } from "@/components/Icons";
+import { CheckIcon, ImageIcon, PlusIcon } from "@/components/Icons";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
 import { Loading, PageHeader } from "./dash-ui";
@@ -64,6 +64,7 @@ export default function CarForm() {
   const [transmission, setTransmission] = useState<string>("manual");
   const [fuel, setFuel] = useState<string>("petrol");
   const [seats, setSeats] = useState<number>(5);
+  const [minDays, setMinDays] = useState(1);
   const [features, setFeatures] = useState<string[]>([]);
   const [available, setAvailable] = useState(true);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -80,7 +81,7 @@ export default function CarForm() {
       const car = data as CarRow | null;
       if (car) {
         setMake(car.make); setModel(car.model); setYear(String(car.year)); setPrice(String(car.price_per_day));
-        setCategory(car.category); setTransmission(car.transmission); setFuel(car.fuel); setSeats(car.seats);
+        setCategory(car.category); setTransmission(car.transmission); setFuel(car.fuel); setSeats(car.seats); setMinDays(car.min_rental_days ?? 1);
         setFeatures(car.features ?? []); setAvailable(car.is_available);
         setPhotos((car.images ?? []).map((url, i) => ({ key: `${i}-${url}`, url })));
       }
@@ -94,7 +95,7 @@ export default function CarForm() {
     if (carId) return;
     return () => {
       setMake(""); setModel(""); setYear(String(THIS_YEAR)); setPrice("");
-      setCategory("economy"); setTransmission("manual"); setFuel("petrol"); setSeats(5);
+      setCategory("economy"); setTransmission("manual"); setFuel("petrol"); setSeats(5); setMinDays(1);
       setFeatures([]); setAvailable(true);
       setPhotos((all) => { all.forEach((p) => { if (p.file) URL.revokeObjectURL(p.url); }); return []; });
       setQueue([]); setQueueTotal(0); setError(null); setSaving(false);
@@ -111,7 +112,10 @@ export default function CarForm() {
   function addFiles(files: FileList | File[] | null) {
     if (!files) return;
     const room = MAX_PHOTOS - photos.length;
-    const picked = Array.from(files).filter((file) => file.type.startsWith("image/")).slice(0, room);
+    const all = Array.from(files);
+    const valid = all.filter((file) => ["image/jpeg", "image/png"].includes(file.type));
+    setError(valid.length < all.length ? dict.dash.auth.fileType : null);
+    const picked = valid.slice(0, room);
     if (picked.length) { setQueueTotal(picked.length); setQueue(picked); }
     if (fileInput.current) fileInput.current.value = "";
   }
@@ -144,7 +148,7 @@ export default function CarForm() {
 
     const fields = {
       make: make.trim(), model: model.trim(), year: parseInt(year, 10) || THIS_YEAR, price_per_day: parseFloat(price),
-      category, transmission, fuel, seats, images: urls, features, is_available: available,
+      category, transmission, fuel, seats, min_rental_days: minDays, images: urls, features, is_available: available,
     };
     const result = carId
       ? await sb.from("cars").update(fields).eq("id", carId)
@@ -206,7 +210,7 @@ export default function CarForm() {
               )}
             </div>
             <p className="mt-4 text-sm text-fg/50">{fill(f.photoCount, { n: photos.length })} · {f.photosHint}</p>
-            <input ref={fileInput} type="file" accept="image/*" multiple className="sr-only" onChange={(e) => addFiles(e.target.files)} />
+            <input ref={fileInput} type="file" accept="image/jpeg,image/png" multiple className="sr-only" onChange={(e) => addFiles(e.target.files)} />
           </Section>
 
           <Section title={f.details}>
@@ -303,6 +307,19 @@ export default function CarForm() {
                   })}
                 </div>
               </div>
+
+              <div>
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.minRental}</p>
+                <div className="flex items-center gap-3 rounded-3xl bg-fg/5 p-3 sm:max-w-sm">
+                  <StepButton label="−" disabled={minDays <= 1} onClick={() => setMinDays((n) => n - 1)} />
+                  <div className="flex-1 text-center">
+                    <p className="font-display text-4xl font-extrabold leading-none tabular-nums">{minDays}</p>
+                    <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-fg/55">{minDays === 1 ? f.dayUnit : f.daysUnit}</p>
+                  </div>
+                  <StepButton label="+" disabled={minDays >= MAX_MIN_RENTAL_DAYS} onClick={() => setMinDays((n) => n + 1)} />
+                </div>
+                <p className="mt-2.5 text-xs text-fg/45">{f.minRentalHint}</p>
+              </div>
             </div>
           </Section>
 
@@ -336,14 +353,14 @@ export default function CarForm() {
         <aside className="space-y-5 lg:sticky lg:top-8 lg:self-start">
           <div className="hidden lg:block">
             <p className="mb-3 text-xs font-bold uppercase tracking-wider text-fg/60">{f.previewTitle}</p>
-            <div className="overflow-hidden rounded-[2rem] bg-white text-ink shadow-xl shadow-black/15">
+            <div className="overflow-hidden rounded-[2rem] bg-white text-ink shadow-xl shadow-black/10">
               <div className="relative aspect-[4/3] bg-paper">
                 {photos[0] ? (
                   photos[0].file
                     /* eslint-disable-next-line @next/next/no-img-element */
                     ? <img src={photos[0].url} alt="" className="h-full w-full object-cover" />
                     : <Image src={photos[0].url} alt="" fill sizes="22rem" className="object-cover" />
-                ) : <span className="absolute inset-0 flex items-center justify-center text-ink/20"><CarIcon className="h-16 w-16" /></span>}
+                ) : <span className="absolute inset-0 flex items-center justify-center text-sm text-muted">{dict.car.noPhoto}</span>}
                 <span className="absolute start-4 top-4 rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold text-white">{labels.category[category as keyof typeof labels.category]}</span>
               </div>
               <div className="space-y-2 p-5">

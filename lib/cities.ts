@@ -36,9 +36,10 @@ export type CityOption = { key: string; label: string };
 /**
  * Every city a visitor can pick: the main cities first, then all the others an agency can sign up from (alphabetical, name as stored).
  * `key` is what the cars filter uses: the slug of a main city, the name itself for the others.
+ * With `keys: "name"` (the sign-up form) every key is the name an agency is stored with.
  */
-export function cityOptions(lang: "fr" | "ar" | "en"): CityOption[] {
-  const main = CITIES.map((c) => ({ key: c.slug, label: c.names[lang] }));
+export function cityOptions(lang: "fr" | "ar" | "en", keys: "slug" | "name" = "slug"): CityOption[] {
+  const main = CITIES.map((c) => ({ key: keys === "slug" ? c.slug : c.name, label: c.names[lang] }));
   const others = MOROCCAN_CITIES.filter((name) => !citySlugFor(name)).map((name) => ({ key: name, label: name }));
   return [...main, ...others.sort((a, b) => a.label.localeCompare(b.label, "fr"))];
 }

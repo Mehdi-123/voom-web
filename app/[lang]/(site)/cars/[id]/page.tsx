@@ -116,7 +116,7 @@ export default async function CarPage({ params }: Props) {
               </p>
             </div>
 
-            <BookingPanel carId={car.id} pricePerDay={car.price_per_day} lang={lang} labels={dict.book} />
+            <BookingPanel carId={car.id} pricePerDay={car.price_per_day} minDays={car.min_rental_days ?? 1} lang={lang} labels={dict.book} />
 
             <dl className="grid grid-cols-2 gap-3">
               {specs.map((s) => (
