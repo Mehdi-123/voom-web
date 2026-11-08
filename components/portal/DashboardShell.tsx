@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { Dictionary } from "@/dictionaries/fr";
@@ -29,7 +29,7 @@ function useStored<T extends string>(key: string, initial: T, fallback?: () => T
 
 /** The private area: checks who is signed in, then shows the right menu (agency or admin) around the page. */
 export default function DashboardShell({ lang, dict, children }: { lang: Locale; dict: Dictionary; children: ReactNode }) {
-  const { ready, user, role, agency, renter, signOut } = useAuth();
+  const { ready, user, role, agency, renter, refresh, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const base = `/${lang}/dashboard`;
@@ -40,6 +40,15 @@ export default function DashboardShell({ lang, dict, children }: { lang: Locale;
   // The dashboard is kept alive while you visit the public site: no pointer-leave ever arrives, so start closed on the way back
   useEffect(() => () => setHover(false), []);
   const notices = useNotices(user?.id);
+  // A review by an admin changes what the account can do (book, publish cars): read the account again when its notice arrives
+  const reviewNotice = notices.items?.find((n) => /^(identity|agency)_(approved|rejected)$/.test(n.data?.type ?? ""))?.id;
+  const knownReview = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!notices.items) return;
+    const first = knownReview.current === undefined;
+    if (reviewNotice && reviewNotice !== knownReview.current && !first) refresh();
+    knownReview.current = reviewNotice ?? null;
+  }, [notices.items, reviewNotice, refresh]);
   const light = theme === "light";
   const c = dict.dash.common;
 

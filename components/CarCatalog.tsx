@@ -34,7 +34,8 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
   const [minDate] = useState(todayIso);
   const [loadedFromUrl, setLoadedFromUrl] = useState(false);
   const results = useRef<HTMLDivElement>(null);
-  const filtersRead = useRef(false);
+  // Set when the person changes a filter, so that reading the address or showing the page again never scrolls
+  const scrollToResults = useRef(false);
 
   const prices = cars.map((c) => c.price_per_day);
   const ceiling = Math.max(100, ...prices);
@@ -72,18 +73,18 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
     return () => clearTimeout(timer);
   }, [f, loadedFromUrl]);
 
-  // After a filter changes, the top of the results comes back into view (the filters may be far above or below it)
+  // After the person changes a filter, the top of the results comes back into view (the filters may be far above or below it)
   useEffect(() => {
-    if (!loadedFromUrl) return;
-    if (!filtersRead.current) { filtersRead.current = true; return; } // the filters read from the address are not a change
+    if (!scrollToResults.current) return;
     const timer = setTimeout(() => {
+      scrollToResults.current = false;
       const top = results.current?.getBoundingClientRect().top;
       if (top === undefined || Math.abs(top - RESULTS_GAP) < 8) return;
       const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       window.scrollTo({ top: window.scrollY + top - RESULTS_GAP, behavior: calm ? "auto" : "smooth" });
     }, 250);
     return () => clearTimeout(timer);
-  }, [f, loadedFromUrl]);
+  }, [f]);
 
   // Which cars are free on the whole period (asked of the database, which knows the bookings)
   const validPeriod = !!f.from && !!f.to && f.to >= f.from;
@@ -101,7 +102,9 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
     return () => { cancelled = true; };
   }, [validPeriod, f.from, f.to]);
 
-  const set = <K extends keyof Filters>(key: K, value: Filters[K]) => setF((cur) => ({ ...cur, [key]: value }));
+  /** Every change made by the person goes through here. */
+  const change = (next: Filters | ((cur: Filters) => Filters)) => { scrollToResults.current = true; setF(next); };
+  const set = <K extends keyof Filters>(key: K, value: Filters[K]) => change((cur) => ({ ...cur, [key]: value }));
   const shown = useMemo(() => {
     const needle = f.q.trim().toLowerCase();
     const list = cars.filter((c) =>
@@ -131,7 +134,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
           min={minDate}
           lang={lang}
           labels={{ pick: t.pickDates, clear: t.clearDates, days: t.daysCount, day: t.dayCount, pickReturn: t.pickReturn, from: t.from_, to: t.to }}
-          onChange={(from, to) => setF((cur) => ({ ...cur, from, to }))}
+          onChange={(from, to) => change((cur) => ({ ...cur, from, to }))}
         />
         <p className="mt-2 text-xs text-muted">{checking ? t.checking : t.periodHint}</p>
         {periodFailed ? <p className="mt-2 text-xs text-[#9a6700]">{t.periodUnavailable}</p> : null}
@@ -180,7 +183,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
         <p className="mt-1 text-sm font-semibold">{f.max === null ? t.any : fill(t.upTo, { price: formatPrice(f.max, lang) })}</p>
       </div>
 
-      {active > 0 ? <button type="button" onClick={() => setF(EMPTY)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line py-3 text-sm font-bold transition-colors hover:bg-paper"><CloseIcon className="h-4 w-4" /> {t.reset}</button> : null}
+      {active > 0 ? <button type="button" onClick={() => change(EMPTY)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line py-3 text-sm font-bold transition-colors hover:bg-paper"><CloseIcon className="h-4 w-4" /> {t.reset}</button> : null}
     </div>
   );
 
@@ -211,7 +214,7 @@ export default function CarCatalog({ cars, lang, dict }: { cars: Car[]; lang: Lo
           <div className="rounded-[2rem] border border-dashed border-line bg-white p-14 text-center">
             <h2 className="font-display text-3xl font-extrabold">{t.noneTitle}</h2>
             <p className="mx-auto mt-3 max-w-md text-muted">{t.noneText}</p>
-            {active > 0 ? <button type="button" onClick={() => setF(EMPTY)} className="mt-6 rounded-full bg-ink px-6 py-3 font-bold text-white">{t.reset}</button> : null}
+            {active > 0 ? <button type="button" onClick={() => change(EMPTY)} className="mt-6 rounded-full bg-ink px-6 py-3 font-bold text-white">{t.reset}</button> : null}
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">

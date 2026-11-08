@@ -7,6 +7,8 @@ import { fill, formatPrice, type Locale } from "@/lib/i18n";
 import { sb } from "@/lib/supabase-browser";
 import type { Dictionary } from "@/dictionaries/fr";
 import RangeCalendar from "./RangeCalendar";
+import { CheckIcon } from "./Icons";
+import { shortDate } from "./portal/dash-ui";
 import { Spinner } from "./portal/ui";
 
 type Props = { carId: string; pricePerDay: number; minDays: number; lang: Locale; labels: Dictionary["book"] };
@@ -50,6 +52,8 @@ export default function BookingPanel({ carId, pricePerDay, minDays, lang, labels
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [busy, setBusy] = useState<Set<string>>(new Set());
+  // The days of this renter's own requests for this car (waiting, confirmed, in progress)
+  const [mine, setMine] = useState<[string, string][]>([]);
   const [who, setWho] = useState<Who | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,30 +78,35 @@ export default function BookingPanel({ carId, pricePerDay, minDays, lang, labels
     let alive = true;
     async function identify(user: User | null) {
       if (!user) { if (alive) setWho({ kind: "guest" }); return; }
-      const [agency, docs, profile] = await Promise.all([
+      const [agency, docs, profile, own] = await Promise.all([
         sb.from("agencies").select("id").eq("user_id", user.id).maybeSingle(),
         sb.from("customer_documents").select("status").eq("user_id", user.id).maybeSingle(),
         sb.from("profiles").select("is_suspended").eq("id", user.id).maybeSingle(),
+        sb.from("bookings").select("date_from, date_to").eq("customer_id", user.id).eq("car_id", carId).in("status", ["pending", "confirmed", "active"]),
       ]);
       if (!alive) return;
+      setMine((own.data ?? []).map((b) => [iso(new Date(b.date_from)), iso(new Date(b.date_to))]));
       if (agency.data) { setWho({ kind: "agency" }); return; }
       setWho({ kind: "customer", identity: (docs.data?.status as "pending" | "approved" | "rejected" | undefined) ?? "none", suspended: !!profile.data?.is_suspended });
     }
     sb.auth.getSession().then(({ data }) => identify(data.session?.user ?? null));
     const { data } = sb.auth.onAuthStateChange((_event, session) => { setTimeout(() => identify(session?.user ?? null), 0); });
     return () => { alive = false; data.subscription.unsubscribe(); };
-  }, []);
+  }, [carId]);
 
   const hasDates = !!from && !!to;
   const days = hasDates ? Math.max(1, Math.round((parse(to).getTime() - parse(from).getTime()) / DAY)) : 0;
   const fee = Math.round(pricePerDay * days * SERVICE_FEE);
   const total = pricePerDay * days + fee;
+  // One request per car and period: dates that touch one the renter already sent cannot be sent again
+  const duplicate = hasDates && mine.some(([start, end]) => start <= to && end >= from);
 
   const nextPath = `/${lang}/cars/${carId}${hasDates ? `?from=${from}&to=${to}` : ""}`;
   const authHref = (page: "login" | "signup") => `/${lang}/${page}?next=${encodeURIComponent(nextPath)}`;
 
   async function send() {
     if (!hasDates || who?.kind !== "customer") return;
+    if (duplicate) { setError(t.duplicate); return; }
     if (days < minDays) { setError(fill(t.minRentalError, { n: minDays })); return; }
     setSending(true);
     setError(null);
@@ -121,7 +130,7 @@ export default function BookingPanel({ carId, pricePerDay, minDays, lang, labels
     if (err || !data) {
       const m = err?.message ?? "";
       if (m.includes("IDENTITY_NOT_VERIFIED")) setWho({ kind: "customer", identity: "none", suspended: false });
-      else setError(m.includes("MIN_RENTAL_DAYS") ? fill(t.minRentalError, { n: minDays }) : m.includes("AGENCY_NOT_APPROVED") ? t.agencyUnavailable : /overlap|conflict|already/i.test(m) ? t.overlap : t.failed);
+      else setError(m.includes("DUPLICATE_BOOKING") ? t.duplicate : m.includes("MIN_RENTAL_DAYS") ? fill(t.minRentalError, { n: minDays }) : m.includes("AGENCY_NOT_APPROVED") ? t.agencyUnavailable : /overlap|conflict|already/i.test(m) ? t.overlap : t.failed);
       return;
     }
     setSent(data.id);
@@ -134,11 +143,39 @@ export default function BookingPanel({ carId, pricePerDay, minDays, lang, labels
   const quiet = "flex h-14 w-full items-center justify-center rounded-2xl border border-line px-6 text-base font-bold text-ink transition-colors hover:bg-paper";
 
   if (sent) {
+    // Request sent, answer from the agency, confirmed: the first is done, the second is where it stands
+    const fills = [1, 0.5, 0];
     return (
-      <section className="rounded-[2rem] border border-line bg-white p-7 text-ink shadow-xl shadow-volt/10" aria-live="polite">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-go/15 text-xl font-bold text-go">✓</span>
-        <h2 className="font-display mt-4 text-2xl font-extrabold">{t.sentTitle}</h2>
-        <p className="mt-2 leading-relaxed text-muted">{t.sentText}</p>
+      <section className="rounded-[2rem] border border-line bg-white p-6 text-ink sm:p-7" aria-live="polite">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-go text-white"><CheckIcon className="h-5 w-5" /></span>
+          <h2 className="font-display text-2xl font-extrabold">{t.sentTitle}</h2>
+        </div>
+        <p className="mt-3 leading-relaxed text-muted">{t.sentText}</p>
+
+        <dl className="mt-5 divide-y divide-line overflow-hidden rounded-2xl bg-paper text-sm">
+          <div className="flex items-center justify-between gap-4 px-4 py-3">
+            <dt className="text-muted">{days === 1 ? t.day : fill(t.days, { n: days })}</dt>
+            <dd className="font-semibold">{shortDate(parse(from).toISOString(), lang)} <span aria-hidden className="inline-block rtl:rotate-180">→</span> {shortDate(parse(to).toISOString(), lang)}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-4 px-4 py-3">
+            <dt className="font-bold">{t.total}</dt>
+            <dd className="font-display text-lg font-extrabold tabular-nums">{price(total)}</dd>
+          </div>
+        </dl>
+
+        <ol className="mt-6 grid grid-cols-3 gap-3">
+          {t.sentSteps.map((label, i) => (
+            <li key={label}>
+              <span className="block h-1 overflow-hidden rounded-full bg-ink/10">
+                <span className="block h-full rounded-full bg-volt" style={{ width: `${fills[i] * 100}%` }} />
+              </span>
+              <span className={`mt-2 block text-xs leading-snug ${i === 1 ? "font-bold" : i === 2 ? "text-muted/70" : "text-muted"}`}>{label}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 text-xs font-semibold text-volt-mid">{fill(t.reply, { h: replyWindow(from) })}</p>
+
         <Link href={`/${lang}/dashboard/bookings/${sent}`} className={`${button} mt-6`}>{t.viewBooking}</Link>
       </section>
     );
@@ -187,8 +224,8 @@ export default function BookingPanel({ carId, pricePerDay, minDays, lang, labels
 
         {verified ? (
           <>
-            {error ? <p role="alert" className="rounded-2xl bg-danger/10 p-4 text-sm font-semibold text-[#c2300f]">{error}</p> : null}
-            <button type="button" onClick={send} disabled={!hasDates || sending} className={button}>
+            {error || duplicate ? <p role="alert" className="rounded-2xl bg-danger/10 p-4 text-sm font-semibold text-[#c2300f]">{error ?? t.duplicate}</p> : null}
+            <button type="button" onClick={send} disabled={!hasDates || sending || duplicate} className={button}>
               {sending ? <><Spinner /> {t.sending}</> : hasDates ? t.send : t.needDates}
             </button>
             {hasDates ? <p className="text-center text-xs font-semibold text-volt-mid">{fill(t.reply, { h: replyWindow(from) })}</p> : null}

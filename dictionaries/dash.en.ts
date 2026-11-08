@@ -281,6 +281,7 @@ const dash: typeof dashFr = {
     browseCars: "Browse cars",
     idPendingShort: "Verification in progress",
     nextTitle: "Your next trip",
+    nextPending: "Waiting for approval",
     inDays: "In {n} days",
     tomorrow: "Tomorrow",
     todayLabel: "Today",

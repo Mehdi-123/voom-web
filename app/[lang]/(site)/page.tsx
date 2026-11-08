@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { hasLocale, getDictionary, formatPrice } from "@/lib/i18n";
+import { Suspense } from "react";
+import { hasLocale, getDictionary, formatPrice, type Locale } from "@/lib/i18n";
+import type { Dictionary } from "@/dictionaries/fr";
 import { CITIES } from "@/lib/cities";
 import { getCars } from "@/lib/cars";
 import CarCard from "@/components/CarCard";
@@ -19,11 +21,45 @@ import { Banknotes, IdScan, PhoneBooking, VerifiedStamp, WhyCard } from "@/compo
 // One hue per city tile, around the brand's purple
 const HUES = [268, 285, 250, 300, 235, 275, 262, 312, 245, 290, 272, 256];
 
+// The cars come from the database and are re-read as they go stale: they load behind Suspense while the rest of the page is already there
+
+/** The lowest real price among the cars on show; nothing when there are none. */
+async function PriceChip({ lang, dict }: { lang: Locale; dict: Dictionary }) {
+  const cars = await getCars({ limit: 8 });
+  if (cars.length === 0) return null;
+  return (
+    <div className="glass float absolute end-0 bottom-28 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:3deg] sm:-end-6 sm:block" style={{ animationDelay: "-4s" }}>
+      <span className="font-normal text-white/60">{dict.phone.from}</span> {formatPrice(Math.min(...cars.map((c) => c.price_per_day)), lang)} <span className="font-normal text-white/60">{dict.phone.perDay}</span>
+    </div>
+  );
+}
+
+/** The latest cars, swiped sideways. */
+async function LatestCars({ lang, dict }: { lang: Locale; dict: Dictionary }) {
+  const cars = await getCars({ limit: 8 });
+  if (cars.length === 0) return null;
+  return (
+    <section className="bg-paper py-24 text-ink sm:py-32">
+      <div className="mx-auto max-w-6xl px-5">
+        <Reveal>
+          <h2 className="font-display text-5xl font-extrabold tracking-tight sm:text-7xl">{dict.popular.title}</h2>
+          <p className="mt-4 text-lg text-muted">{dict.popular.subtitle}</p>
+          <Link href={`/${lang}/cars`} className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-bold text-white transition-colors hover:bg-volt">{dict.catalog.seeAll} <ArrowIcon className="h-4 w-4 rtl:rotate-180" /></Link>
+        </Reveal>
+      </div>
+      <div className="no-scrollbar -mb-10 mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-16 pt-6 scroll-ps-5 sm:px-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))] sm:scroll-ps-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))]">
+        {cars.map((car) => (
+          <CarCard key={car.id} car={car} lang={lang} dict={dict} className="w-[82vw] shrink-0 snap-start sm:w-[22rem]" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function HomePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
-  const cars = await getCars({ limit: 8 });
   // Real screenshots of the app, in the order of the three steps
   const storyPhones = [
     { shot: "car", alt: dict.how.steps[0].title },
@@ -63,12 +99,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             <div className="glass float absolute start-0 top-24 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:-4deg] sm:-start-6 sm:block lg:-start-10" style={{ animationDelay: "-2s" }}>
               <span className="text-go">✓</span> {dict.phone.chipConfirmed}
             </div>
-            {/* The lowest real price among the cars on show; nothing when there are none */}
-            {cars.length > 0 ? (
-              <div className="glass float absolute end-0 bottom-28 hidden rounded-2xl px-4 py-3 text-sm font-bold [--r:3deg] sm:-end-6 sm:block" style={{ animationDelay: "-4s" }}>
-                <span className="font-normal text-white/60">{dict.phone.from}</span> {formatPrice(Math.min(...cars.map((c) => c.price_per_day)), lang)} <span className="font-normal text-white/60">{dict.phone.perDay}</span>
-              </div>
-            ) : null}
+            <Suspense fallback={null}><PriceChip lang={lang} dict={dict} /></Suspense>
           </Reveal>
         </div>
       </section>
@@ -115,22 +146,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
       </section>
 
       {/* ── Latest cars: swipe sideways ── */}
-      {cars.length > 0 ? (
-        <section className="bg-paper py-24 text-ink sm:py-32">
-          <div className="mx-auto max-w-6xl px-5">
-            <Reveal>
-              <h2 className="font-display text-5xl font-extrabold tracking-tight sm:text-7xl">{dict.popular.title}</h2>
-              <p className="mt-4 text-lg text-muted">{dict.popular.subtitle}</p>
-              <Link href={`/${lang}/cars`} className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-bold text-white transition-colors hover:bg-volt">{dict.catalog.seeAll} <ArrowIcon className="h-4 w-4 rtl:rotate-180" /></Link>
-            </Reveal>
-          </div>
-          <div className="no-scrollbar -mb-10 mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-16 pt-6 scroll-ps-5 sm:px-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))] sm:scroll-ps-[max(1.25rem,calc((100vw-72rem)/2+1.25rem))]">
-            {cars.map((car) => (
-              <CarCard key={car.id} car={car} lang={lang} dict={dict} className="w-[82vw] shrink-0 snap-start sm:w-[22rem]" />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <Suspense fallback={null}><LatestCars lang={lang} dict={dict} /></Suspense>
 
       {/* ── Why Voom ── */}
       <section className="bg-ink px-5 py-24 sm:py-32">

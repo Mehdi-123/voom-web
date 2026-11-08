@@ -279,6 +279,7 @@ const dash = {
     browseCars: "Voir les voitures",
     idPendingShort: "Vérification en cours",
     nextTitle: "Votre prochaine location",
+    nextPending: "En attente d'approbation",
     inDays: "Dans {n} jours",
     tomorrow: "Demain",
     todayLabel: "Aujourd'hui",

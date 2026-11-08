@@ -38,10 +38,10 @@ export default function CustomerHome() {
   const shown = filter === "all" ? rows : rows.filter((r) => r.status === filter);
   const countOf = (f: (typeof FILTERS)[number]) => (f === "all" ? rows.length : rows.filter((r) => r.status === f).length);
 
-  // The trip to look forward to: the one in progress, else the soonest that is still on
-  const trip = rows.find((r) => r.status === "active")
-    ?? rows.filter((r) => (r.status === "confirmed" || r.status === "pending") && new Date(r.date_to).getTime() >= today)
-      .sort((a, b) => new Date(a.date_from).getTime() - new Date(b.date_from).getTime())[0];
+  // The trip to look forward to: the one in progress, else the soonest confirmed one, else the soonest request still waiting for the agency
+  const soonest = (status: string) => rows.filter((r) => r.status === status && new Date(r.date_to).getTime() >= today)
+    .sort((a, b) => new Date(a.date_from).getTime() - new Date(b.date_from).getTime())[0];
+  const trip = rows.find((r) => r.status === "active") ?? soonest("confirmed") ?? soonest("pending");
   const until = trip ? Math.round((new Date(trip.date_from).setHours(0, 0, 0, 0) - today) / DAY) : 0;
   const when = !trip ? "" : trip.status === "active" ? m.ongoing : until <= 0 ? m.todayLabel : until === 1 ? m.tomorrow : fill(m.inDays, { n: until });
   const completed = rows.filter((r) => r.status === "completed");
@@ -75,7 +75,7 @@ export default function CustomerHome() {
             {photo ? <Image src={photo} alt="" fill sizes="21rem" className="-z-10 object-cover" /> : null}
             <span aria-hidden className={`absolute inset-0 -z-10 ${photo ? "bg-black/55 backdrop-blur-[3px]" : "bg-black/20"}`} />
             <div className="flex items-center justify-between gap-3">
-              <span className="truncate text-[11px] font-bold uppercase tracking-wider text-white/75">{m.nextTitle}</span>
+              <span className="truncate text-[11px] font-bold uppercase tracking-wider text-white/75">{trip.status === "pending" ? m.nextPending : m.nextTitle}</span>
               <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-extrabold text-ink">{when}</span>
             </div>
             <div className="min-w-0">

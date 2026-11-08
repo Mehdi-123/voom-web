@@ -281,6 +281,7 @@ const dash: typeof dashFr = {
     browseCars: "تصفح السيارات",
     idPendingShort: "قيد التحقق",
     nextTitle: "رحلتك القادمة",
+    nextPending: "في انتظار الموافقة",
     inDays: "بعد {n} أيام",
     tomorrow: "غدًا",
     todayLabel: "اليوم",

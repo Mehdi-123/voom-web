@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { LOCALES, getDictionary, hasLocale } from "@/lib/i18n";
+import { LOCALES, getDictionary, hasLocale, type Locale } from "@/lib/i18n";
+import type { Dictionary } from "@/dictionaries/fr";
 import { getCars } from "@/lib/cars";
 import { alternatesFor } from "@/lib/seo";
 import CarCatalog from "@/components/CarCatalog";
@@ -26,11 +27,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/** The cars come from the database and are re-read as they go stale, so they load behind a placeholder while the page around them is already there. */
+async function Catalog({ lang, dict }: { lang: Locale; dict: Dictionary }) {
+  const cars = await getCars();
+  return <CarCatalog cars={cars} lang={lang} dict={dict} />;
+}
+
+function CatalogFallback() {
+  return (
+    <div aria-hidden className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }, (_, i) => <div key={i} className="aspect-[4/5] animate-pulse rounded-[2rem] bg-white" />)}
+    </div>
+  );
+}
+
 export default async function CarsPage({ params }: Props) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
-  const cars = await getCars();
 
   return (
     <>
@@ -44,7 +58,7 @@ export default async function CarsPage({ params }: Props) {
         </div>
       </section>
       <section className="bg-paper px-5 py-12 text-ink sm:py-16">
-        <Suspense fallback={null}><CarCatalog cars={cars} lang={lang} dict={dict} /></Suspense>
+        <Suspense fallback={<CatalogFallback />}><Catalog lang={lang} dict={dict} /></Suspense>
       </section>
     </>
   );

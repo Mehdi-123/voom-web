@@ -97,7 +97,7 @@ export default function CityCombobox({ options, value, onChange, label, allLabel
             <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-volt/20 text-volt-soft"><PinIcon className="h-[18px] w-[18px]" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-[11px] font-bold uppercase leading-none tracking-wider text-white/45">{label}</span>
-              <span className="mt-1 block truncate text-lg font-semibold leading-none">{current.label}</span>
+              <span className="block truncate py-0.5 text-lg font-semibold leading-snug">{current.label}</span>
             </span>
             <ChevronDownIcon className={`h-5 w-5 shrink-0 text-white/50 transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
           </>
