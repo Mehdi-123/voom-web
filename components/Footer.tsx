@@ -2,23 +2,27 @@ import Link from "next/link";
 import type { Dictionary } from "@/dictionaries/fr";
 import type { Locale } from "@/lib/i18n";
 import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_LINK } from "@/lib/site";
-import { CITIES } from "@/lib/cities";
 
 export default function Footer({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   return (
     <footer className="relative overflow-hidden bg-ink text-white/70">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-20 sm:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-20 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="font-display text-2xl font-extrabold text-white">{dict.footer.tagline}</p>
         </div>
         <div>
           <h2 className="mb-4 text-sm font-semibold text-white">{dict.footer.explore}</h2>
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            {CITIES.slice(0, 6).map((c) => (
-              <li key={c.slug}><Link href={`/${lang}/cars?city=${c.slug}`} className="hover:text-white">{c.names[lang]}</Link></li>
-            ))}
+          <ul className="space-y-2 text-sm">
             <li><Link href={`/${lang}/cars`} className="hover:text-white">{dict.nav.cars}</Link></li>
             <li><Link href={`/${lang}/agencies`} className="hover:text-white">{dict.nav.agencies}</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h2 className="mb-4 text-sm font-semibold text-white">{dict.footer.legal}</h2>
+          <ul className="space-y-2 text-sm">
+            <li><Link href={`/${lang}/terms`} className="hover:text-white">{dict.footer.terms}</Link></li>
+            <li><Link href={`/${lang}/privacy`} className="hover:text-white">{dict.footer.privacy}</Link></li>
+            <li><Link href={`/${lang}/contact`} className="hover:text-white">{dict.footer.contactUs}</Link></li>
           </ul>
         </div>
         <div>

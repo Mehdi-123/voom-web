@@ -4,22 +4,25 @@ import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import Image from "next/image";
 import { sb } from "@/lib/supabase-browser";
 import { resizeToJpeg } from "@/lib/image";
-import { formatPhone, isValidPhone, nationalNumber } from "@/lib/phone";
+import { formatPhone, isValidPhone, parsePhone, type Country } from "@/lib/phone";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
 import { Card, Initial, Loading, PageHeader, StatusBadge } from "./dash-ui";
+import PhoneInput from "./PhoneInput";
 import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
 import PasswordForm from "./PasswordForm";
 import { BellIcon } from "@/components/Icons";
 
 export default function AgencyProfile() {
   const { agency, user, refresh } = useAuth();
-  const { dict } = useDash();
+  const { dict, lang } = useDash();
   const t = dict.dash;
   const p = t.profile;
   const fileInput = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(agency?.name ?? "");
-  const [phone, setPhone] = useState(agency?.phone ? nationalNumber(agency.phone.replace(/^\+212/, "")) : "");
+  const stored = parsePhone(agency?.phone);
+  const [country, setCountry] = useState<Country>(stored.country);
+  const [phone, setPhone] = useState(stored.number);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +34,10 @@ export default function AgencyProfile() {
   async function save(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError(t.auth.required); return; }
-    if (!isValidPhone(phone)) { setError(t.auth.invalidPhone); return; }
+    if (!isValidPhone(country, phone)) { setError(t.auth.invalidPhone); return; }
     setSaving(true);
     setError(null);
-    const full = formatPhone(phone);
+    const full = formatPhone(country, phone);
     // The agency's row is what customers and admins read; the account's own details are kept in step
     const [row, meta] = await Promise.all([
       sb.from("agencies").update({ name: name.trim(), phone: full }).eq("id", agency!.id),
@@ -89,11 +92,8 @@ export default function AgencyProfile() {
 
           <form onSubmit={save} className="space-y-7">
             <Field label={p.name}><TextInput value={name} onChange={(e) => { setName(e.target.value); setSaved(false); }} /></Field>
-            <Field label={p.phone}>
-              <div dir="ltr" className="flex gap-2">
-                <span className="flex h-14 items-center rounded-2xl border border-fg/15 bg-fg/5 px-4 font-semibold text-fg/70">+212</span>
-                <TextInput type="tel" value={phone} onChange={(e) => { setPhone(e.target.value.replace(/[^\d\s]/g, "")); setSaved(false); }} />
-              </div>
+            <Field group label={p.phone}>
+              <PhoneInput lang={lang} labels={{ country: t.auth.phoneCountry, search: t.auth.phoneSearch, none: t.auth.phoneNone }} country={country} onCountry={(c) => { setCountry(c); setSaved(false); }} value={phone} onChange={(v) => { setPhone(v); setSaved(false); }} />
             </Field>
             {error ? <ErrorNote>{error}</ErrorNote> : null}
             <PrimaryButton type="submit" loading={saving} className="sm:w-auto sm:min-w-48">{saved ? `✓ ${t.common.saved}` : saving ? t.common.saving : t.common.save}</PrimaryButton>

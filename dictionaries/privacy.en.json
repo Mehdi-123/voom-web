@@ -1,0 +1,46 @@
+{
+  "title": "Privacy policy",
+  "updated": "Last updated: 2026. This explains what Voom collects, why, and your choices.",
+  "sections": [
+    {
+      "title": "1. Who we are",
+      "body": "Voom is a platform that connects renters with car rental agencies in Morocco, on the website and in the app. This policy applies to both. To reach us about your data, write to support@voomrental.com."
+    },
+    {
+      "title": "2. What we collect",
+      "body": "Your name, email address, phone number and password (stored in encrypted form). If you are a renter: photos of your ID card and driving licence. If you are an agency: its name, address, city, registration number and business licence photo, and the owner's name. We also keep your bookings, your profile photo if you add one, and the technical code your phone gives us to send notifications."
+    },
+    {
+      "title": "3. Why we use it",
+      "body": "To create and secure your account, to let renters request cars and agencies answer, to check identity and agencies before bookings can happen, to send you messages about your bookings and your account, and to prevent fraud and abuse."
+    },
+    {
+      "title": "4. Who can see it",
+      "body": "An agency sees the name, phone number and dates of the renters who ask for its cars. Voom administrators see the documents they must review. Nobody else can open your identity documents: they are kept in private storage. We do not sell your data and we do not show advertising."
+    },
+    {
+      "title": "5. Payments",
+      "body": "Voom does not take payments. You pay the agency directly when you pick up the car, so we never receive or keep your card details."
+    },
+    {
+      "title": "6. Where it is kept",
+      "body": "Your data is stored with our hosting provider, Supabase, with access limited by security rules. A bot check from Cloudflare protects the sign-up and sign-in forms. The website only uses the cookies and storage it needs to keep you signed in and to remember your choices such as language and theme."
+    },
+    {
+      "title": "7. Your choices",
+      "body": "You can change your name, phone number and photo from your profile, and send new documents at any time. You can ask us to delete your account and the data linked to it from the app's profile or by writing to us; some records of past bookings may be kept where the law or a dispute requires it."
+    },
+    {
+      "title": "8. How long we keep it",
+      "body": "We keep your data while your account is open. When it is deleted, we remove your personal data, except what we must keep for legal or security reasons."
+    },
+    {
+      "title": "9. Children",
+      "body": "Voom is for adults who hold a valid driving licence. It is not meant for people under 18."
+    },
+    {
+      "title": "10. Changes and contact",
+      "body": "If we change this policy, the date above changes. For any question about your data, write to support@voomrental.com."
+    }
+  ]
+}

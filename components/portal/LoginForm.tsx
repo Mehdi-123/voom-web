@@ -9,9 +9,13 @@ import { sb } from "@/lib/supabase-browser";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { useAuth } from "./AuthProvider";
 import { readNext, useNextSuffix } from "@/lib/next-path";
-import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
+import { Field, PrimaryButton, TextInput } from "./ui";
 import PasswordInput from "./PasswordInput";
-import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
+import { OTP_LENGTH } from "./OtpBoxes";
+import CodeStep from "./CodeStep";
+import { sendEmailCode, verifyEmailCode } from "@/lib/email-code";
+import { useCooldown } from "@/lib/use-cooldown";
+import { useStepBack } from "@/lib/use-step-back";
 
 /** Email and password. If the email was never verified, the same card asks for the code we just sent. */
 export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictionary }) {
@@ -24,6 +28,9 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
   const [loading, setLoading] = useState(false);
   const [needsCode, setNeedsCode] = useState(false);
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [resent, setResent] = useState(false);
+  const [wait, startWait] = useCooldown();
 
   const cleanEmail = email.trim().toLowerCase();
   const nextSuffix = useNextSuffix(lang);
@@ -41,10 +48,14 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
     setLoading(false);
     setPassword("");
     setNeedsCode(false);
+    setSentTo(null);
     setDigits(Array(OTP_LENGTH).fill(""));
     setError(null);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [ready, user]);
+
+  // Back from the code page shows the sign-in form again, as typed
+  useStepBack(needsCode, () => setNeedsCode(false));
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -58,7 +69,8 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
     const { error: err } = await sb.auth.signInWithPassword({ email: cleanEmail, password });
     if (err) {
       if (err.code === "email_not_confirmed" || /email not confirmed/i.test(err.message)) {
-        await sb.auth.signInWithOtp({ email: cleanEmail, options: { shouldCreateUser: false } });
+        // A code is sent once a minute: coming back with the same email shows the page again without sending another
+        if (sentTo !== cleanEmail || wait <= 0) { await sendEmailCode(cleanEmail); setSentTo(cleanEmail); setResent(false); startWait(); }
         setNeedsCode(true);
       } else {
         setError({ message: authErrorMessage(dict, err, t.failed), fields: ["email", "password"] });
@@ -71,29 +83,25 @@ export default function LoginForm({ lang, dict }: { lang: Locale; dict: Dictiona
 
   async function verify(e: FormEvent) {
     e.preventDefault();
+    if (digits.some((d) => !d)) { setError({ message: t.codeIncomplete, fields: [] }); return; }
     setLoading(true);
     setError(null);
-    const token = digits.join("");
-    let { error: err } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "email" });
-    if (err) ({ error: err } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "signup" }));
+    const { error: err } = await verifyEmailCode(cleanEmail, digits.join(""));
     setLoading(false);
     if (err) { setError({ message: t.wrongCode, fields: [] }); setDigits(Array(OTP_LENGTH).fill("")); return; }
     router.replace(destination());
   }
 
+  async function resend() {
+    if (wait > 0) return;
+    await sendEmailCode(cleanEmail);
+    setResent(true);
+    setError(null);
+    startWait();
+  }
+
   if (needsCode) {
-    return (
-      <form onSubmit={verify} className="space-y-8">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-fg/60">{t.notVerified}</p>
-          <p className="mt-1 font-semibold">{cleanEmail}</p>
-        </div>
-        <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
-        {error ? <ErrorNote>{error.message}</ErrorNote> : null}
-        <PrimaryButton type="submit" loading={loading} disabled={digits.some((d) => !d)}>{loading ? t.verifying : t.verify}</PrimaryButton>
-      </form>
-    );
+    return <CodeStep dict={dict} email={cleanEmail} intro={t.notVerified} digits={digits} onDigits={setDigits} loading={loading} error={error?.message ?? null} wait={wait} resent={resent} onResend={resend} onSubmit={verify} onBack={() => window.history.back()} />;
   }
 
   return (

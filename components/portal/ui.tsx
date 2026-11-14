@@ -3,6 +3,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import BackLink from "@/components/BackLink";
 import type { Locale } from "@/lib/i18n";
+import { AlertIcon, CheckIcon } from "@/components/Icons";
 
 /** Centered card on the night background, for sign in, sign up and password reset. */
 export function AuthShell({ lang, children, wide = false, back, backHref }: { lang: Locale; children: ReactNode; wide?: boolean; back?: string; backHref?: string }) {
@@ -29,15 +30,16 @@ export function AuthShell({ lang, children, wide = false, back, backHref }: { la
 
 const fieldBase = "h-14 w-full rounded-2xl border border-fg/15 bg-fg/5 px-5 text-base text-fg outline-none transition-colors placeholder:text-fg/35 focus:border-volt focus:bg-fg/10";
 
-type FieldProps = { label: string; error?: string; hint?: string; children: ReactNode };
+type FieldProps = { label: string; error?: string; hint?: string; children: ReactNode; /** A control with buttons of its own: a click on the label must not press them. */ group?: boolean };
 /** A label, the control, and its error or hint. */
-export function Field({ label, error, hint, children }: FieldProps) {
+export function Field({ label, error, hint, children, group }: FieldProps) {
+  const Wrapper = group ? "div" : "label";
   return (
-    <label className="block">
+    <Wrapper className="block">
       <span className="mb-3 block text-xs font-bold uppercase tracking-wider text-fg/60">{label}</span>
       {children}
       {error ? <span className="mt-2.5 block text-sm text-danger">{error}</span> : hint ? <span className="mt-2.5 block text-xs text-fg/45">{hint}</span> : null}
-    </label>
+    </Wrapper>
   );
 }
 
@@ -88,6 +90,22 @@ export function Spinner({ className = "h-5 w-5" }: { className?: string }) {
 }
 
 /** A red note for something that went wrong. */
-export function ErrorNote({ children }: { children: ReactNode }) {
-  return <p role="alert" className="rounded-2xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">{children}</p>;
+const NOTICE = {
+  error: { box: "border-danger/25 bg-danger/10", icon: "bg-danger text-white", role: "alert" as const },
+  success: { box: "border-go/25 bg-go/10", icon: "bg-go text-white", role: "status" as const },
+};
+
+/** A message under a form: a round icon and the text in the normal colour, so long sentences stay easy to read. */
+function Notice({ tone, children }: { tone: keyof typeof NOTICE; children: ReactNode }) {
+  const look = NOTICE[tone];
+  return (
+    <p role={look.role} className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-sm leading-relaxed ${look.box}`}>
+      <span className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${look.icon}`}>
+        {tone === "error" ? <AlertIcon className="h-5 w-5" /> : <CheckIcon className="h-3 w-3" />}
+      </span>
+      <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{children}</span>
+    </p>
+  );
 }
+export const ErrorNote = ({ children }: { children: ReactNode }) => <Notice tone="error">{children}</Notice>;
+export const SuccessNote = ({ children }: { children: ReactNode }) => <Notice tone="success">{children}</Notice>;

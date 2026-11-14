@@ -4,25 +4,28 @@ import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import Image from "next/image";
 import { sb } from "@/lib/supabase-browser";
 import { resizeToJpeg } from "@/lib/image";
-import { formatPhone, isValidPhone, nationalNumber } from "@/lib/phone";
+import { formatPhone, isValidPhone, parsePhone, type Country } from "@/lib/phone";
 import { BellIcon } from "@/components/Icons";
 import { useAuth } from "./AuthProvider";
 import { useDash } from "./DashContext";
 import { Card, Initial, Loading, PageHeader } from "./dash-ui";
 import IdentityCard from "./IdentityCard";
 import PasswordForm from "./PasswordForm";
+import PhoneInput from "./PhoneInput";
 import { ErrorNote, Field, PrimaryButton, TextInput } from "./ui";
 
 /** The renter's profile: photo, name, phone, password, and what only the app can do. */
 export default function MyProfile() {
   const { user, renter, refresh } = useAuth();
-  const { dict } = useDash();
+  const { dict, lang } = useDash();
   const t = dict.dash;
   const m = t.me;
   const p = t.profile;
   const fileInput = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(renter?.name ?? "");
-  const [phone, setPhone] = useState(renter?.phone ? nationalNumber(renter.phone.replace(/^\+212/, "")) : "");
+  const stored = parsePhone(renter?.phone);
+  const [country, setCountry] = useState<Country>(stored.country);
+  const [phone, setPhone] = useState(stored.number);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,10 +37,10 @@ export default function MyProfile() {
   async function save(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError(t.auth.required); return; }
-    if (phone.trim() && !isValidPhone(phone)) { setError(t.auth.invalidPhone); return; }
+    if (phone.trim() && !isValidPhone(country, phone)) { setError(t.auth.invalidPhone); return; }
     setSaving(true);
     setError(null);
-    const full = phone.trim() ? formatPhone(phone) : "";
+    const full = phone.trim() ? formatPhone(country, phone) : "";
     const [meta, row] = await Promise.all([
       sb.auth.updateUser({ data: { name: name.trim(), phone: full } }),
       sb.from("profiles").update({ name: name.trim(), phone: full || null }).eq("id", user!.id),
@@ -93,11 +96,8 @@ export default function MyProfile() {
 
           <form onSubmit={save} className="space-y-7">
             <Field label={m.name}><TextInput value={name} onChange={(e) => { setName(e.target.value); setSaved(false); }} autoComplete="name" /></Field>
-            <Field label={p.phone}>
-              <div dir="ltr" className="flex gap-2">
-                <span className="flex h-14 items-center rounded-2xl border border-fg/15 bg-fg/5 px-4 font-semibold text-fg/70">+212</span>
-                <TextInput type="tel" value={phone} onChange={(e) => { setPhone(e.target.value.replace(/[^\d\s]/g, "")); setSaved(false); }} autoComplete="tel-national" />
-              </div>
+            <Field group label={p.phone}>
+              <PhoneInput lang={lang} labels={{ country: t.auth.phoneCountry, search: t.auth.phoneSearch, none: t.auth.phoneNone }} country={country} onCountry={(c) => { setCountry(c); setSaved(false); }} value={phone} onChange={(v) => { setPhone(v); setSaved(false); }} />
             </Field>
             {error ? <ErrorNote>{error}</ErrorNote> : null}
             <PrimaryButton type="submit" loading={saving} className="sm:w-auto sm:min-w-48">{saved ? `✓ ${t.common.saved}` : saving ? t.common.saving : t.common.save}</PrimaryButton>

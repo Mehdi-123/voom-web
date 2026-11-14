@@ -8,15 +8,17 @@ import type { Locale } from "@/lib/i18n";
 import { sb } from "@/lib/supabase-browser";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { cityOptions } from "@/lib/cities";
-import { maskEmail } from "@/lib/mask-email";
+import { sendEmailCode, verifyEmailCode } from "@/lib/email-code";
 import { useCooldown } from "@/lib/use-cooldown";
-import { fill } from "@/lib/i18n";
+import { useStepBack } from "@/lib/use-step-back";
 import CityCombobox from "@/components/CityCombobox";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
-import { formatPhone, isValidPhone } from "@/lib/phone";
+import { DEFAULT_COUNTRY, formatPhone, isValidPhone, type Country } from "@/lib/phone";
 import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, TextInput } from "./ui";
 import PasswordInput from "./PasswordInput";
-import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
+import PhoneInput from "./PhoneInput";
+import { OTP_LENGTH } from "./OtpBoxes";
+import CodeStep from "./CodeStep";
 import Turnstile from "./Turnstile";
 import { turnstileEnabled } from "@/lib/turnstile";
 
@@ -38,6 +40,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
   const [agencyName, setAgencyName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState<Country>(DEFAULT_COUNTRY);
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [registration, setRegistration] = useState("");
@@ -51,16 +54,20 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
   const [wait, startWait] = useCooldown();
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRound, setCaptchaRound] = useState(0);
+  // Once a code was sent the account exists: going back and forward again shows the code page without creating it twice
+  const [sentWith, setSentWith] = useState<{ email: string; password: string } | null>(null);
 
   const cleanEmail = email.trim().toLowerCase();
   const mismatch = confirm && password !== confirm ? t.mismatch : undefined;
+
+  useStepBack(phase === "code", () => setPhase("form"));
 
   function validate(): boolean {
     const e: Record<string, string> = {};
     const req = (key: string, value: string) => { if (!value.trim()) e[key] = t.required; };
     if (step === 1) {
       req("agencyName", agencyName); req("ownerName", ownerName);
-      if (!isValidPhone(phone)) e.phone = t.invalidPhone;
+      if (!isValidPhone(country, phone)) e.phone = t.invalidPhone;
     }
     if (step === 2) { req("city", city); req("address", address); }
     if (step === 3) {
@@ -71,9 +78,12 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
     }
     if (step === 4) {
       if (!EMAIL.test(cleanEmail)) e.email = t.invalidEmail;
-      if (!isStrongPassword(password)) e.password = t.required;
-      if (password !== confirm) e.confirm = t.mismatch;
+      if (!password) e.password = t.required;
+      else if (!isStrongPassword(password)) e.password = t.passwordWeak;
+      if (!confirm) e.confirm = t.required;
+      else if (password !== confirm) e.confirm = t.mismatch;
       if (!accepted) e.accepted = t.required;
+      if (turnstileEnabled && !captcha && !sentWith) e.captcha = t.captchaRequired;
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -97,15 +107,16 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
   async function createAccount(ev: FormEvent) {
     ev.preventDefault();
     if (!validate()) return;
-    setLoading(true);
     setFormError(null);
+    if (sentWith?.email === cleanEmail) { setPhase("code"); return; }
+    setLoading(true);
     // The account is created on our server, after it confirms the bot check
     const res = await fetch("/api/verified-auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "signup", token: captcha, email: cleanEmail, password,
-        data: { role: "agency", agencyName: agencyName.trim(), ownerName: ownerName.trim(), city, address: address.trim(), phone: formatPhone(phone), name: agencyName.trim() },
+        data: { role: "agency", agencyName: agencyName.trim(), ownerName: ownerName.trim(), city, address: address.trim(), phone: formatPhone(country, phone), name: agencyName.trim() },
       }),
     }).catch(() => null);
     const result = (await res?.json().catch(() => null)) as { ok?: boolean; exists?: boolean; error?: { code?: string; message?: string; status?: number } } | null;
@@ -117,26 +128,28 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
     }
     if (result.exists) { setLoading(false); setFormError(t.exists); return; }
     setLoading(false);
+    setSentWith({ email: cleanEmail, password });
     setPhase("code");
     startWait();
   }
 
   async function verify(ev: FormEvent) {
     ev.preventDefault();
+    if (digits.some((d) => !d)) { setFormError(t.codeIncomplete); return; }
     setLoading(true);
     setFormError(null);
-    const token = digits.join("");
-    let { error } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "email" });
-    if (error) ({ error } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "signup" }));
+    const { error } = await verifyEmailCode(cleanEmail, digits.join(""));
     if (error) { setLoading(false); setFormError(t.wrongCode); setDigits(Array(OTP_LENGTH).fill("")); return; }
+    // A password changed after going back from this page replaces the one the account was created with
+    if (sentWith && password !== sentWith.password) await sb.auth.updateUser({ password });
     await sendDocuments();
   }
 
   async function resend() {
     if (wait > 0) return;
-    const { error } = await sb.auth.signInWithOtp({ email: cleanEmail, options: { shouldCreateUser: false } });
-    if (error) await sb.auth.resend({ type: "signup", email: cleanEmail });
+    await sendEmailCode(cleanEmail);
     setResent(true);
+    setFormError(null);
     startWait();
   }
 
@@ -150,19 +163,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
   }
 
   if (phase === "code") {
-    return (
-      <form onSubmit={verify} className="space-y-8">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", maskEmail(cleanEmail))}</p>
-        </div>
-        <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
-        {formError ? <ErrorNote>{formError}</ErrorNote> : null}
-        <PrimaryButton type="submit" loading={loading} disabled={digits.some((d) => !d)}>{loading ? t.verifying : t.verify}</PrimaryButton>
-        {resent && wait > 0 ? <p className="text-center text-sm font-semibold text-go">{t.resent}</p> : null}
-        <button type="button" onClick={resend} disabled={wait > 0} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline disabled:cursor-not-allowed disabled:text-fg/40 disabled:no-underline">{wait > 0 ? fill(t.resendIn, { s: wait }) : t.resend}</button>
-      </form>
-    );
+    return <CodeStep dict={dict} email={cleanEmail} digits={digits} onDigits={setDigits} loading={loading} error={formError} wait={wait} resent={resent} onResend={resend} onSubmit={verify} onBack={() => window.history.back()} />;
   }
 
   const rules = [
@@ -191,11 +192,8 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
         <>
           <Field label={t.agencyName} error={errors.agencyName}><TextInput value={agencyName} onChange={(e) => setAgencyName(e.target.value)} invalid={!!errors.agencyName} autoComplete="organization" /></Field>
           <Field label={t.ownerName} error={errors.ownerName}><TextInput value={ownerName} onChange={(e) => setOwnerName(e.target.value)} invalid={!!errors.ownerName} autoComplete="name" /></Field>
-          <Field label={t.phone} error={errors.phone} hint={t.phoneHint}>
-            <div dir="ltr" className="flex gap-2">
-              <span className="flex h-14 items-center rounded-2xl border border-fg/15 bg-fg/5 px-4 font-semibold text-fg/70">+212</span>
-              <TextInput type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))} invalid={!!errors.phone} autoComplete="tel-national" placeholder="6 12 34 56 78" />
-            </div>
+          <Field group label={t.phone} error={errors.phone} hint={t.phoneHint}>
+            <PhoneInput lang={lang} labels={{ country: t.phoneCountry, search: t.phoneSearch, none: t.phoneNone }} country={country} onCountry={setCountry} value={phone} onChange={setPhone} invalid={!!errors.phone} placeholder={country.iso === "MA" ? "6 12 34 56 78" : undefined} />
           </Field>
         </>
       ) : null}
@@ -226,7 +224,7 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
 
       {step === 4 ? (
         <>
-          <Field label={t.email} error={errors.email}><TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t.emailPlaceholder} invalid={!!errors.email} autoComplete="email" /></Field>
+          <Field label={t.email} error={errors.email}><TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t.emailPlaceholder} invalid={!!errors.email} autoComplete="email" readOnly={!!sentWith} className={sentWith ? "opacity-60" : ""} /></Field>
           <Field label={t.password} error={errors.password}>
             <PasswordInput common={dict.dash.common} value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
@@ -249,13 +247,18 @@ export default function SignupForm({ lang, dict }: { lang: Locale; dict: Diction
         </>
       ) : null}
 
-      {step === 4 ? <Turnstile lang={lang} onToken={setCaptcha} resetKey={captchaRound} /> : null}
+      {step === 4 ? (
+        <div>
+          <Turnstile lang={lang} onToken={setCaptcha} resetKey={captchaRound} />
+          {errors.captcha ? <span className="mt-2 block text-sm text-danger">{errors.captcha}</span> : null}
+        </div>
+      ) : null}
 
       {formError ? <ErrorNote>{formError}</ErrorNote> : null}
 
       <div className="flex gap-3 pt-3">
-        {step > 1 ? <GhostButton type="button" onClick={() => { setErrors({}); setStep((s) => s - 1); }}>{dict.dash.common.back}</GhostButton> : null}
-        <PrimaryButton type="submit" loading={loading} disabled={step === 4 && (!accepted || !isStrongPassword(password) || password !== confirm || (turnstileEnabled && !captcha))}>
+        {step > 1 && !sentWith ? <GhostButton type="button" onClick={() => { setErrors({}); setStep((s) => s - 1); }}>{dict.dash.common.back}</GhostButton> : null}
+        <PrimaryButton type="submit" loading={loading}>
           {step === 4 ? (loading ? t.creating : t.create) : t.next}
         </PrimaryButton>
       </div>

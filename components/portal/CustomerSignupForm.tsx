@@ -10,15 +10,17 @@ import { authErrorMessage } from "@/lib/auth-errors";
 import { readNext, useNextSuffix } from "@/lib/next-path";
 import { emptyDocs, hasAllDocs, uploadIdentity, type DocFiles } from "@/lib/identity-docs";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
-import { formatPhone, isValidPhone } from "@/lib/phone";
+import { DEFAULT_COUNTRY, formatPhone, isValidPhone, type Country } from "@/lib/phone";
 import { turnstileEnabled } from "@/lib/turnstile";
-import { maskEmail } from "@/lib/mask-email";
+import { sendEmailCode, verifyEmailCode } from "@/lib/email-code";
 import { useCooldown } from "@/lib/use-cooldown";
-import { fill } from "@/lib/i18n";
+import { useStepBack } from "@/lib/use-step-back";
 import { Checkbox, ErrorNote, Field, GhostButton, PrimaryButton, TextInput } from "./ui";
 import PasswordInput from "./PasswordInput";
+import PhoneInput from "./PhoneInput";
 import { useAuth } from "./AuthProvider";
-import OtpBoxes, { OTP_LENGTH } from "./OtpBoxes";
+import { OTP_LENGTH } from "./OtpBoxes";
+import CodeStep from "./CodeStep";
 import Turnstile from "./Turnstile";
 import IdentityPhotos from "./IdentityPhotos";
 
@@ -41,6 +43,7 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState<Country>(DEFAULT_COUNTRY);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -51,22 +54,31 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
   const [wait, startWait] = useCooldown();
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [captchaRound, setCaptchaRound] = useState(0);
+  // Once a code was sent the account exists: going back and forward again shows the code page without creating it twice
+  const [sentWith, setSentWith] = useState<{ email: string; password: string } | null>(null);
 
   const cleanEmail = email.trim().toLowerCase();
   const someDocs = Object.values(docs).some(Boolean);
   const allDocs = hasAllDocs(docs);
   const mismatch = confirm && password !== confirm ? t.mismatch : undefined;
 
+  useStepBack(coding, () => setCoding(false));
+
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (step === 1) {
       if (!name.trim()) e.name = t.required;
-      if (!isValidPhone(phone)) e.phone = t.invalidPhone;
+      if (!isValidPhone(country, phone)) e.phone = t.invalidPhone;
+    } else if (step === 2) {
+      if (someDocs && !allDocs) e.docs = t.docsAllOrNone;
     } else if (step === 3) {
       if (!EMAIL.test(cleanEmail)) e.email = t.invalidEmail;
-      if (!isStrongPassword(password)) e.password = t.required;
-      if (password !== confirm) e.confirm = t.mismatch;
+      if (!password) e.password = t.required;
+      else if (!isStrongPassword(password)) e.password = t.passwordWeak;
+      if (!confirm) e.confirm = t.required;
+      else if (password !== confirm) e.confirm = t.mismatch;
       if (!accepted) e.accepted = t.required;
+      if (turnstileEnabled && !captcha && !sentWith) e.captcha = t.captchaRequired;
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -75,13 +87,14 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
   async function createAccount(ev: FormEvent) {
     ev.preventDefault();
     if (!validate()) return;
-    setLoading(true);
     setFormError(null);
+    if (sentWith?.email === cleanEmail) { setCoding(true); return; }
+    setLoading(true);
     // The account is created on our server, after it confirms the bot check
     const res = await fetch("/api/verified-auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "signup", token: captcha, email: cleanEmail, password, data: { role: "customer", name: name.trim(), phone: formatPhone(phone) } }),
+      body: JSON.stringify({ action: "signup", token: captcha, email: cleanEmail, password, data: { role: "customer", name: name.trim(), phone: formatPhone(country, phone) } }),
     }).catch(() => null);
     const result = (await res?.json().catch(() => null)) as { ok?: boolean; exists?: boolean; error?: { code?: string; message?: string; status?: number } } | null;
     setCaptchaRound((n) => n + 1);
@@ -91,18 +104,20 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
       return;
     }
     if (result.exists) { setFormError(t.exists); return; }
+    setSentWith({ email: cleanEmail, password });
     setCoding(true);
     startWait();
   }
 
   async function verify(ev: FormEvent) {
     ev.preventDefault();
+    if (digits.some((d) => !d)) { setFormError(t.codeIncomplete); return; }
     setLoading(true);
     setFormError(null);
-    const token = digits.join("");
-    let { data, error } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "email" });
-    if (error) ({ data, error } = await sb.auth.verifyOtp({ email: cleanEmail, token, type: "signup" }));
+    const { data, error } = await verifyEmailCode(cleanEmail, digits.join(""));
     if (error) { setLoading(false); setFormError(t.wrongCode); setDigits(Array(OTP_LENGTH).fill("")); return; }
+    // A password changed after going back from this page replaces the one the account was created with
+    if (sentWith && password !== sentWith.password) await sb.auth.updateUser({ password });
     // Documents are optional. If they were all added they go up now; if that fails the account page offers them again.
     const userId = data.user?.id ?? (await sb.auth.getSession()).data.session?.user.id;
     const sent = userId && hasAllDocs(docs) ? await uploadIdentity(userId, docs) : true;
@@ -113,26 +128,14 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
 
   async function resend() {
     if (wait > 0) return;
-    const { error } = await sb.auth.signInWithOtp({ email: cleanEmail, options: { shouldCreateUser: false } });
-    if (error) await sb.auth.resend({ type: "signup", email: cleanEmail });
+    await sendEmailCode(cleanEmail);
     setResent(true);
+    setFormError(null);
     startWait();
   }
 
   if (coding) {
-    return (
-      <form onSubmit={verify} className="space-y-8">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold">{t.codeTitle}</h1>
-          <p className="mt-3 leading-relaxed text-fg/60">{t.codeSubtitle.replace("{email}", maskEmail(cleanEmail))}</p>
-        </div>
-        <OtpBoxes digits={digits} onChange={setDigits} label={t.code} />
-        {formError ? <ErrorNote>{formError}</ErrorNote> : null}
-        <PrimaryButton type="submit" loading={loading} disabled={digits.some((d) => !d)}>{loading ? t.verifying : t.verify}</PrimaryButton>
-        {resent && wait > 0 ? <p className="text-center text-sm font-semibold text-go">{t.resent}</p> : null}
-        <button type="button" onClick={resend} disabled={wait > 0} className="block w-full text-center text-sm font-semibold text-volt-soft hover:underline disabled:cursor-not-allowed disabled:text-fg/40 disabled:no-underline">{wait > 0 ? fill(t.resendIn, { s: wait }) : t.resend}</button>
-      </form>
-    );
+    return <CodeStep dict={dict} email={cleanEmail} digits={digits} onDigits={setDigits} loading={loading} error={formError} wait={wait} resent={resent} onResend={resend} onSubmit={verify} onBack={() => window.history.back()} />;
   }
 
   const rules = [
@@ -160,11 +163,8 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
       {step === 1 ? (
         <>
           <Field label={t.fullName} error={errors.name}><TextInput value={name} onChange={(e) => setName(e.target.value)} invalid={!!errors.name} autoComplete="name" /></Field>
-          <Field label={t.phone} error={errors.phone} hint={t.phoneHint}>
-            <div dir="ltr" className="flex gap-2">
-              <span className="flex h-14 items-center rounded-2xl border border-fg/15 bg-fg/5 px-4 font-semibold text-fg/70">+212</span>
-              <TextInput type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s]/g, ""))} invalid={!!errors.phone} autoComplete="tel-national" placeholder="6 12 34 56 78" />
-            </div>
+          <Field group label={t.phone} error={errors.phone} hint={t.phoneHint}>
+            <PhoneInput lang={lang} labels={{ country: t.phoneCountry, search: t.phoneSearch, none: t.phoneNone }} country={country} onCountry={setCountry} value={phone} onChange={setPhone} invalid={!!errors.phone} placeholder={country.iso === "MA" ? "6 12 34 56 78" : undefined} />
           </Field>
         </>
       ) : step === 2 ? (
@@ -174,11 +174,11 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
             <p className="mt-1.5 text-sm leading-relaxed text-fg/60">{t.docsText}</p>
           </div>
           <IdentityPhotos dict={dict} files={docs} onChange={setDocs} />
-          {someDocs && !allDocs ? <p className="text-sm font-semibold text-warn">{t.docsAllOrNone}</p> : null}
+          {errors.docs ? <p className="text-sm font-semibold text-danger">{errors.docs}</p> : null}
         </>
       ) : (
         <>
-          <Field label={t.email} error={errors.email}><TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t.emailPlaceholder} invalid={!!errors.email} autoComplete="email" /></Field>
+          <Field label={t.email} error={errors.email}><TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t.emailPlaceholder} invalid={!!errors.email} autoComplete="email" readOnly={!!sentWith} className={sentWith ? "opacity-60" : ""} /></Field>
           <Field label={t.password} error={errors.password}>
             <PasswordInput common={dict.dash.common} value={password} onChange={(e) => setPassword(e.target.value)} invalid={!!errors.password} autoComplete="new-password" />
             <ul className="mt-4 space-y-2">
@@ -198,15 +198,18 @@ export default function CustomerSignupForm({ lang, dict }: { lang: Locale; dict:
             </Checkbox>
             {errors.accepted ? <span className="mt-1.5 block text-sm text-danger">{errors.accepted}</span> : null}
           </div>
-          <Turnstile lang={lang} onToken={setCaptcha} resetKey={captchaRound} />
+          <div>
+            <Turnstile lang={lang} onToken={setCaptcha} resetKey={captchaRound} />
+            {errors.captcha ? <span className="mt-2 block text-sm text-danger">{errors.captcha}</span> : null}
+          </div>
         </>
       )}
 
       {formError ? <ErrorNote>{formError}</ErrorNote> : null}
 
       <div className="flex gap-3 pt-3">
-        {step > 1 ? <GhostButton type="button" onClick={() => { setErrors({}); setStep((n) => n - 1); }}>{dict.dash.common.back}</GhostButton> : null}
-        <PrimaryButton type="submit" loading={loading} disabled={(step === 2 && someDocs && !allDocs) || (step === 3 && (!accepted || !isStrongPassword(password) || password !== confirm || (turnstileEnabled && !captcha)))}>
+        {step > 1 && !sentWith ? <GhostButton type="button" onClick={() => { setErrors({}); setStep((n) => n - 1); }}>{dict.dash.common.back}</GhostButton> : null}
+        <PrimaryButton type="submit" loading={loading}>
           {step === 3 ? (loading ? t.creating : t.create) : step === 2 && !someDocs ? t.skip : t.next}
         </PrimaryButton>
       </div>

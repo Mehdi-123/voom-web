@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/site";
 /** Every page in every language, each listing its translations so Google links them together. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const cars = await getCars();
-  const paths = ["", "/cars", "/agencies", ...cars.map((c) => `/cars/${c.id}`)];
+  const paths = ["", "/cars", "/agencies", "/contact", "/terms", "/privacy", ...cars.map((c) => `/cars/${c.id}`)];
 
   return paths.flatMap((path) =>
     LOCALES.map((lang) => ({

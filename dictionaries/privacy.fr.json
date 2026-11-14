@@ -1,0 +1,46 @@
+{
+  "title": "Politique de confidentialité",
+  "updated": "Dernière mise à jour : 2026. Ce texte explique ce que Voom collecte, pourquoi, et vos choix.",
+  "sections": [
+    {
+      "title": "1. Qui nous sommes",
+      "body": "Voom est une plateforme qui met en relation des locataires et des agences de location de voitures au Maroc, sur le site et dans l'application. Cette politique s'applique aux deux. Pour toute question sur vos données, écrivez à support@voomrental.com."
+    },
+    {
+      "title": "2. Ce que nous collectons",
+      "body": "Votre nom, votre adresse e-mail, votre numéro de téléphone et votre mot de passe (stocké sous forme chiffrée). Si vous êtes locataire : les photos de votre carte d'identité et de votre permis de conduire. Si vous êtes une agence : son nom, son adresse, sa ville, son numéro de registre, la photo de son autorisation d'exercer et le nom du gérant. Nous conservons aussi vos réservations, votre photo de profil si vous en ajoutez une, et le code technique que votre téléphone nous donne pour envoyer des notifications."
+    },
+    {
+      "title": "3. Pourquoi nous l'utilisons",
+      "body": "Pour créer et sécuriser votre compte, permettre aux locataires de demander des voitures et aux agences de répondre, vérifier l'identité et les agences avant les réservations, vous envoyer des messages sur vos réservations et votre compte, et prévenir la fraude et les abus."
+    },
+    {
+      "title": "4. Qui peut le voir",
+      "body": "Une agence voit le nom, le téléphone et les dates des locataires qui demandent ses voitures. Les administrateurs de Voom voient les documents qu'ils doivent vérifier. Personne d'autre ne peut ouvrir vos documents d'identité : ils sont conservés dans un espace privé. Nous ne vendons pas vos données et n'affichons aucune publicité."
+    },
+    {
+      "title": "5. Paiements",
+      "body": "Voom ne prend aucun paiement. Vous payez l'agence directement à la remise de la voiture : nous ne recevons ni ne conservons jamais vos données de carte."
+    },
+    {
+      "title": "6. Où elles sont conservées",
+      "body": "Vos données sont stockées chez notre hébergeur, Supabase, avec un accès limité par des règles de sécurité. Une vérification anti-robot de Cloudflare protège les formulaires d'inscription et de connexion. Le site n'utilise que les cookies et le stockage nécessaires pour vous garder connecté et retenir vos choix comme la langue et le thème."
+    },
+    {
+      "title": "7. Vos choix",
+      "body": "Vous pouvez modifier votre nom, votre téléphone et votre photo depuis votre profil, et envoyer de nouveaux documents à tout moment. Vous pouvez demander la suppression de votre compte et des données liées depuis le profil de l'application ou en nous écrivant ; certains éléments de réservations passées peuvent être conservés lorsque la loi ou un litige l'exige."
+    },
+    {
+      "title": "8. Durée de conservation",
+      "body": "Nous conservons vos données tant que votre compte est ouvert. Lorsqu'il est supprimé, nous effaçons vos données personnelles, sauf ce que nous devons garder pour des raisons légales ou de sécurité."
+    },
+    {
+      "title": "9. Mineurs",
+      "body": "Voom s'adresse aux adultes titulaires d'un permis de conduire valide. Il n'est pas destiné aux personnes de moins de 18 ans."
+    },
+    {
+      "title": "10. Modifications et contact",
+      "body": "Si nous modifions cette politique, la date ci-dessus change. Pour toute question sur vos données, écrivez à support@voomrental.com."
+    }
+  ]
+}

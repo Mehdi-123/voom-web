@@ -107,32 +107,35 @@ export default function NoticesList() {
           {groups.map((g) => (
             <section key={g.label}>
               <h2 className="px-1 pb-2 pt-8 text-[11px] font-bold uppercase tracking-[0.12em] text-fg/50">{g.label}</h2>
+              {/* The divider belongs to each row's wrapper: on the rounded button it would curve at both ends */}
               <div className="divide-y divide-fg/10">
                 {g.rows.map((n) => {
                   const type = n.data?.type;
                   const photo = (n.booking_id && photos[`b:${n.booking_id}`]) || (n.data?.agency_id && photos[`a:${n.data.agency_id}`]) || (n.data?.user_id && photos[`u:${n.data.user_id}`]) || null;
                   const person = type === "review_customer";
                   return (
-                    <button key={n.id} type="button" onClick={() => open(n)} className="-mx-3 flex w-[calc(100%+1.5rem)] items-start gap-3.5 rounded-2xl px-3 py-4 text-start transition-colors hover:bg-fg/5">
-                      <span className="relative shrink-0">
-                        {photo ? (
-                          person
-                            ? <Initial name={n.title} src={photo} className="h-11 w-11" />
-                            : <span className="relative block h-11 w-11 overflow-hidden rounded-[14px] bg-fg/10"><Image src={photo} alt="" fill sizes="44px" unoptimized className="object-cover" /></span>
-                        ) : (
-                          <span className={`flex h-11 w-11 items-center justify-center rounded-[14px] ${softToneOf(type)}`}>{iconOf(type, "h-5 w-5")}</span>
-                        )}
-                        {photo ? <span className={`absolute -bottom-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-page ${toneOf(type)}`}>{iconOf(type, "h-3 w-3")}</span> : null}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-3">
-                          <span className="min-w-0 flex-1 truncate font-bold">{n.title}</span>
-                          <span className="shrink-0 text-[11px] text-fg/50">{timeAgo(n.sent_at, lang, notices.items ? stamp : 0)}</span>
+                    <div key={n.id}>
+                      <button type="button" onClick={() => open(n)} className="-mx-3 flex w-[calc(100%+1.5rem)] items-start gap-3.5 rounded-2xl px-3 py-4 text-start transition-colors hover:bg-fg/5">
+                        <span className="relative shrink-0">
+                          {photo ? (
+                            person
+                              ? <Initial name={n.title} src={photo} className="h-11 w-11" />
+                              : <span className="relative block h-11 w-11 overflow-hidden rounded-[14px] bg-fg/10"><Image src={photo} alt="" fill sizes="44px" unoptimized className="object-cover" /></span>
+                          ) : (
+                            <span className={`flex h-11 w-11 items-center justify-center rounded-[14px] ${softToneOf(type)}`}>{iconOf(type, "h-5 w-5")}</span>
+                          )}
+                          {photo ? <span className={`absolute -bottom-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-page ${toneOf(type)}`}>{iconOf(type, "h-3 w-3")}</span> : null}
                         </span>
-                        <span className="mt-1 line-clamp-3 block text-[13px] leading-5 text-fg/60">{n.body}</span>
-                      </span>
-                      {n.read_at ? <span className="mt-2 h-[9px] w-[9px] shrink-0" /> : <span aria-hidden className="mt-2 h-[9px] w-[9px] shrink-0 rounded-full bg-volt" />}
-                    </button>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-3">
+                            <span className="min-w-0 flex-1 truncate font-bold">{n.title}</span>
+                            <span className="shrink-0 text-[11px] text-fg/50">{timeAgo(n.sent_at, lang, notices.items ? stamp : 0)}</span>
+                          </span>
+                          <span className="mt-1 line-clamp-3 block text-[13px] leading-5 text-fg/60">{n.body}</span>
+                        </span>
+                        {n.read_at ? <span className="mt-2 h-[9px] w-[9px] shrink-0" /> : <span aria-hidden className="mt-2 h-[9px] w-[9px] shrink-0 rounded-full bg-volt" />}
+                      </button>
+                    </div>
                   );
                 })}
               </div>
